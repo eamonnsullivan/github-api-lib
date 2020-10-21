@@ -1,0 +1,182 @@
+{
+  "data": {
+    "search": {
+      "repositoryCount": 7,
+      "nodes": [
+        {
+          "name": "project1",
+          "description": "A description for project one",
+          "url": "https://github.com/my-org/project1",
+          "sshUrl": "git@github.com:my-org/project1.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "JavaScript"
+              },
+              {
+                "name": "Python"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "CSS"
+              },
+              {
+                "name": "HTML"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project2",
+          "description": "A description for project two",
+          "url": "https://github.com/my-org/project2",
+          "sshUrl": "git@github.com:my-org/project2.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Clojure"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project3",
+          "description": "A description for project three",
+          "url": "https://github.com/my-org/project3",
+          "sshUrl": "git@github.com:my-org/project3.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Clojure"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project4",
+          "description": "A description for project four",
+          "url": "https://github.com/my-org/project4",
+          "sshUrl": "git@github.com:my-org/project4.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Scala"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "Makefile"
+              },
+              {
+                "name": "Gherkin"
+              },
+              {
+                "name": "CSS"
+              },
+              {
+                "name": "HTML"
+              },
+              {
+                "name": "JavaScript"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project5",
+          "description": "A description for project five",
+          "url": "https://github.com/my-org/project5",
+          "sshUrl": "git@github.com:my-org/project5.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Scala"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "Makefile"
+              },
+              {
+                "name": "Gherkin"
+              },
+              {
+                "name": "CSS"
+              },
+              {
+                "name": "HTML"
+              },
+              {
+                "name": "JavaScript"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project6",
+          "description": null,
+          "url": "https://github.com/my-org/project6",
+          "sshUrl": "git@github.com:my-org/project6.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Scala"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "Makefile"
+              },
+              {
+                "name": "Gherkin"
+              },
+              {
+                "name": "CSS"
+              },
+              {
+                "name": "HTML"
+              },
+              {
+                "name": "JavaScript"
+              }
+            ]
+          }
+        },
+        {
+          "name": "project7",
+          "description": "A description for project seven",
+          "url": "https://github.com/my-org/project7",
+          "sshUrl": "git@github.com:my-org/project7.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Python"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "JavaScript"
+              },
+              {
+                "name": "Gherkin"
+              },
+              {
+                "name": "CSS"
+              }
+            ]
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true,
+        "endCursor": "Y3Vyc29yOjc="
+      }
+    }
+  }
+}

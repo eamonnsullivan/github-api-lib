@@ -1,0 +1,23 @@
+query($first:Int!, $after: String, $query: String!) {
+  search(type:REPOSITORY, query:$query, first: $first, after: $after) {
+    repositoryCount
+    nodes {
+      ... on Repository {
+        name
+        description
+        url
+        sshUrl
+        updatedAt
+        languages(first: 2 orderBy:{field: SIZE, direction:DESC}) {
+          nodes {
+            name
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

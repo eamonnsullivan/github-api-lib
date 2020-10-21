@@ -1,0 +1,21 @@
+mutation AddComment ($pullRequestId: ID!, $body: String!) {
+  addComment(input: {subjectId: $pullRequestId, body: $body}) {
+    commentEdge {
+      node {
+        id
+        url
+        author {
+          login
+          url
+        }
+        body
+        createdAt
+        editor {
+          login
+          url
+        }
+        updatedAt
+      }
+    }
+  }
+}

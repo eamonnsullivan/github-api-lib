@@ -1,0 +1,20 @@
+{
+  "data": {
+    "updatePullRequest": null
+  },
+  "errors": [
+    {
+      "type": "NOT_FOUND",
+      "path": [
+        "updatePullRequest"
+      ],
+      "locations": [
+        {
+          "line": 6,
+          "column": 3
+        }
+      ],
+      "message": "Could not resolve to a node with the global id of 'invalid-id'"
+    }
+  ]
+}

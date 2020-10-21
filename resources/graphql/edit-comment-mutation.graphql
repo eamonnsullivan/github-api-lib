@@ -1,0 +1,21 @@
+mutation EditIssueComment ($commentId: ID!, $body: String!) {
+  updateIssueComment(
+    input: { id: $commentId, body: $body }
+  ) {
+    issueComment {
+      id
+      url
+      author {
+        login
+        url
+      }
+      body
+      createdAt
+      editor {
+        login
+        url
+      }
+      updatedAt
+    }
+  }
+}

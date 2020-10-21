@@ -1,0 +1,44 @@
+{
+  "data": {
+    "search": {
+      "repositoryCount": 1,
+      "nodes": [
+        {
+          "name": "project8",
+          "description": "A description for project eight",
+          "url": "https://github.com/bbc/project8",
+          "sshUrl": "git@github.com:bbc/project8.git",
+          "languages": {
+            "nodes": [
+              {
+                "name": "Scala"
+              },
+              {
+                "name": "Shell"
+              },
+              {
+                "name": "Makefile"
+              },
+              {
+                "name": "Gherkin"
+              },
+              {
+                "name": "CSS"
+              },
+              {
+                "name": "HTML"
+              },
+              {
+                "name": "JavaScript"
+              }
+            ]
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": "Y3Vyc29yOjc="
+      }
+    }
+  }
+}

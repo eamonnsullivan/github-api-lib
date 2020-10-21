@@ -1,0 +1,45 @@
+mutation ClosePullRequest ($pullRequestId: ID!) {
+  closePullRequest(input: {pullRequestId: $pullRequestId}) {
+    pullRequest {
+      additions
+      author {
+        login
+        url
+      }
+      baseRefOid
+      body
+      changedFiles
+      checksResourcePath
+      closed
+      closedAt
+      createdAt
+      deletions
+      headRefOid
+      id
+      isDraft
+      maintainerCanModify
+      mergeable
+      mergeCommit {
+        abbreviatedOid
+        message
+        messageBody
+        messageHeadline
+      }
+      merged
+      mergedAt
+      mergedBy {
+        login
+        url
+      }
+      number
+      permalink
+      repository {
+        id
+        url
+      }
+      revertUrl
+      state
+      title
+    }
+  }
+}

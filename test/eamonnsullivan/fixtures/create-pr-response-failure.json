@@ -1,0 +1,22 @@
+{
+  "data": {
+    "createPullRequest": {
+      "pullRequest": null
+    }
+  },
+  "errors": [
+    {
+      "type": "UNPROCESSABLE",
+      "path": [
+        "createPullRequest"
+      ],
+      "locations": [
+        {
+          "line": 3,
+          "column": 3
+        }
+      ],
+      "message": "A pull request already exists for eamonnsullivan:create."
+    }
+  ]
+}

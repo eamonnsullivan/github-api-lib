@@ -1,0 +1,50 @@
+mutation MergePullRequest ($pullRequestId: ID!, $title: String, $body: String, $mergeMethod: PullRequestMergeMethod, $authorEmail: String, $expectedHeadRef: GitObjectID ) {
+  mergePullRequest(input: {pullRequestId: $pullRequestId,
+      commitHeadline: $title,
+      commitBody: $body,
+      mergeMethod: $mergeMethod,
+      authorEmail: $authorEmail,
+      expectedHeadOid: $expectedHeadRef}) {
+    pullRequest {
+      additions
+      author {
+        login
+        url
+      }
+      baseRefOid
+      body
+      changedFiles
+      checksResourcePath
+      closed
+      closedAt
+      createdAt
+      deletions
+      headRefOid
+      id
+      isDraft
+      maintainerCanModify
+      mergeable
+      mergeCommit {
+        abbreviatedOid
+        message
+        messageBody
+        messageHeadline
+      }
+      merged
+      mergedAt
+      mergedBy {
+        login
+        url
+      }
+      number
+      permalink
+      repository {
+        id
+        url
+      }
+      revertUrl
+      state
+      title
+    }
+  }
+}

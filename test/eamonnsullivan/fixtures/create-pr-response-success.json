@@ -1,0 +1,47 @@
+{
+  "data": {
+    "createPullRequest": {
+      "pullRequest": {
+        "id": "MDExOlB1bGxSZXF1ZXN0NDkxMDgxOTQw",
+        "permalink": "https://github.com/eamonnsullivan/github-pr-lib/pull/1",
+        "title": "Get additional information on pull requests",
+        "body": "A body.",
+        "baseRefOid": "ae9e6802cd7bf6f3610352af5a5890c304f3ee51",
+        "headRefOid": "47c8189e514408cf85eb3b24462d86dc106f34a6",
+        "author": {
+          "login": "eamonnsullivan",
+          "url": "https://github.com/eamonnsullivan"
+        },
+        "closed": false,
+        "isDraft": false,
+        "merged": false,
+        "mergeable": "UNKNOWN",
+        "number": 1,
+        "repository": {
+          "id": "MDEwOlJlcG9zaXRvcnkyOTczNzY1NTc=",
+          "url": "https://github.com/eamonnsullivan/github-pr-lib"
+        },
+        "state": "OPEN",
+        "additions": 176,
+        "deletions": 329,
+        "changedFiles": 31,
+        "checksResourcePath": "/eamonnsullivan/github-pr-lib/pull/18/checks",
+        "closedAt": "2020-10-04T20:57:07Z",
+        "createdAt": "2020-10-04T20:44:53Z",
+        "maintainerCanModify": false,
+        "mergeCommit": {
+          "abbreviatedOid": "d1408e9",
+          "message": "Pull request properties, refactoring\n\n* Move fixtures, so that they aren't in the jar file.\n\n* Refactored get-pull-request-id to use REST API (no paging)\n\n* Refactor getting comment id, similarly.\n\n* Bump version, document change, remove unused vars/functions",
+          "messageBody": "* Move fixtures, so that they aren't in the jar file.\n\n* Refactored get-pull-request-id to use REST API (no paging)\n\n* Refactor getting comment id, similarly.\n\n* Bump version, document change, remove unused vars/functions",
+          "messageHeadline": "Pull request properties, refactoring"
+        },
+        "mergedAt": "2020-10-04T20:57:06Z",
+        "mergedBy": {
+          "login": "eamonnsullivan",
+          "url": "https://github.com/eamonnsullivan"
+        },
+        "revertUrl": "https://github.com/eamonnsullivan/github-pr-lib/pull/18/revert"
+      }
+    }
+  }
+}

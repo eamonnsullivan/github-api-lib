@@ -1,0 +1,45 @@
+{
+  "data": {
+    "node": {
+      "id": "MDExOlB1bGxSZXF1ZXN0MTYyMTgyMzIz",
+      "title": "A test title",
+      "body": "With a body",
+      "baseRefOid": "bfd5dcb...",
+      "headRefOid": "214012f...",
+      "permalink": "https://github.com/owner/name/pull/9",
+      "author": {
+        "login": "johnsmith",
+        "url": "https://github.com/johnsmith"
+      },
+      "closed": true,
+      "isDraft": false,
+      "merged": true,
+      "mergeable": "UNKNOWN",
+      "number": 9,
+      "repository": {
+        "id": "MDEwOlJlcG9zaXRvcnk5MjQyMDExMQ==",
+        "url": "https://github.com/owner/name"
+      },
+      "state": "MERGED",
+      "additions": 176,
+      "deletions": 329,
+      "changedFiles": 31,
+      "checksResourcePath": "/eamonnsullivan/github-pr-lib/pull/18/checks",
+      "closedAt": "2020-10-04T20:57:07Z",
+      "createdAt": "2020-10-04T20:44:53Z",
+      "maintainerCanModify": false,
+      "mergeCommit": {
+        "abbreviatedOid": "d1408e9",
+        "message": "Pull request properties, refactoring\n\n* Move fixtures, so that they aren't in the jar file.\n\n* Refactored get-pull-request-id to use REST API (no paging)\n\n* Refactor getting comment id, similarly.\n\n* Bump version, document change, remove unused vars/functions",
+        "messageBody": "* Move fixtures, so that they aren't in the jar file.\n\n* Refactored get-pull-request-id to use REST API (no paging)\n\n* Refactor getting comment id, similarly.\n\n* Bump version, document change, remove unused vars/functions",
+        "messageHeadline": "Pull request properties, refactoring"
+      },
+      "mergedAt": "2020-10-04T20:57:06Z",
+      "mergedBy": {
+        "login": "eamonnsullivan",
+        "url": "https://github.com/eamonnsullivan"
+      },
+      "revertUrl": "https://github.com/eamonnsullivan/github-pr-lib/pull/18/revert"
+    }
+  }
+}
