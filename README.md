@@ -7,19 +7,19 @@ A small, very simple library with bits and pieces of Github's GraphQL and REST A
 [![Clojars Project](https://img.shields.io/clojars/v/eamonnsullivan/github-api-lib.svg)](https://clojars.org/eamonnsullivan/github-api-lib)
 
 You will need a Github access token with `repo` permissions. This is one way to provide that value:
-```
+```clojure
 (def token (System/getenv "GITHUB_ACCESS_TOKEN"))
 ```
 ### Pull Requests
 
-```
+```clojure
 (require '[eamonnsullivan.github-api-lib.pull-requests :as pr])
 ```
 
 All of these methods return a map of information about the new or updated pull request or comment, such as the `:body` (in markdown), `:title`, `:permalink` or whether the pull request `:isDraft` or `:mergeable`.
 
 #### Create a new pull request
-```
+```clojure
 (def options {:title "A title for the pull request"
               :body "The body of the pull request"
               :base "main or master, usually"
@@ -32,36 +32,36 @@ All of these methods return a map of information about the new or updated pull r
 The `:title`, `:base` and `:branch` are mandatory. You can omit the `:body`, and `:draft` defaults to true.
 
 #### Update a pull request
-```
+```clojure
 (def updated {:title "A new title"
               :body "A new body"})
 (pr/update-pull-request token new-pr-url updated)
 ```
 #### Mark a pull request as ready for review
-```
+```clojure
 (pr/mark-ready-for-review token new-pr-url)
 ```
 #### Comment on a pull request
 Only handles issue comments on pull requests at the moment. The body text can use Github-style markdown.
-```
+```clojure
 ;; returns the permalink for the comment
 (def comment-link (pr/add-pull-request-comment token new-pr-url "Another comment."))
 ```
 #### Edit an issue comment
-```
+```clojure
 (pr/edit-pull-request-comment token comment-link
                            "The new body for the comment, with *some markdown* and `stuff`.")
 ```
 #### Close a pull request
-```
+```clojure
 (pr/close-pull-request token new-pr-url)
 ```
 #### Reopen a pull request
-```
+```clojure
 (pr/reopen-pull-request token new-pr-url)
 ```
 #### Merge a pull request
-```
+```clojure
 ;; All of these fields are optional. The merge-method will default to "SQUASH".
 ;; The merge will fail if the pull-request's URL can't be found, if the pull
 ;; request's head reference is out-of-date or if there are conflicts.
@@ -72,7 +72,7 @@ Only handles issue comments on pull requests at the moment. The body text can us
 (pr/merge-pull-request token new-pr-url merge-options)
 ```
 #### Misc. info
-```
+```clojure
 ;; Various bits of information, such as whether it is mergeable or a draft.
 (pr/get-pull-request-info token new-pr-url)
 ```
