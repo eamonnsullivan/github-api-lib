@@ -1,6 +1,6 @@
 (ns eamonnsullivan.github-api-lib.pull-requests-test
   (:require [clojure.test :refer :all]
-            [eamonnsullivan.github-api-lib :as core]
+            [eamonnsullivan.github-api-lib.core :as core]
             [eamonnsullivan.github-api-lib.pull-requests :as sut]
             [clojure.string :as string]
             [clojure.data.json :as json]))
@@ -41,7 +41,12 @@
     (testing "throws exception on error"
       (is (thrown-with-msg? RuntimeException
                             #"Could not resolve to a Repository with the name 'eamonnsullivan/not-there'."
-                            (sut/get-repo-id "secret-token" "owner" "repo-name"))))))
+                            (sut/get-repo-id "secret-token" "owner" "repo-name")))))
+  (with-redefs [core/parse-repo (fn [_] (throw (ex-info "error" {})))]
+    (testing "passes on thrown exceptions from parse-repo"
+      (is (thrown-with-msg? RuntimeException
+                            #"error"
+                            (sut/get-repo-id "secret-token" "whatever/whatever"))))))
 
 (defn make-fake-post
   [query-response mutation-response query-asserts mutation-asserts]
@@ -73,6 +78,17 @@
                                                               :base "main"
                                                               :branch "new-stuff"
                                                               :draft false})]
+        (is (has-value :permalink "https://github.com/eamonnsullivan/github-pr-lib/pull/1") response)
+        (is (has-value :isDraft false) response)
+        (is (has-value :body "A body") response)
+        (is (has-value :merged false) response)))
+    (testing "Creates a pull request and parses url"
+      (let [response (sut/create-pull-request "secret-token" "https://github.com/eamonnsullivan/github-pr-lib"
+                                              {:title "some title"
+                                               :body "A body"
+                                               :base "main"
+                                               :branch "new-stuff"
+                                               :draft false})]
         (is (has-value :permalink "https://github.com/eamonnsullivan/github-pr-lib/pull/1") response)
         (is (has-value :isDraft false) response)
         (is (has-value :body "A body") response)
@@ -117,6 +133,14 @@
                                                :draft false}))))
 
 
+(defn test-args-to-pull-request-node-id
+  [token owner name prnum state]
+  (is (= "secret" token))
+  (is (= "owner" owner))
+  (is (= "name" name))
+  (is (= "open" state))
+  "a-node-id")
+
 (deftest test-get-pull-request-id
   (with-redefs [core/http-get (fn [_ _ _] {:body "{\"node_id\": \"a-node-id\"}"})]
     (testing "finds the node id in the body"
@@ -124,7 +148,10 @@
   (with-redefs [core/http-get (fn [_ _ _] {:body "{}"})]
     (testing "Throws exception on failure"
       (is (thrown-with-msg? RuntimeException #"Could not find pull request: https://github.com/owner/name/pull/2"
-                            (sut/get-pull-request-id "secret" "https://github.com/owner/name/pull/2"))))))
+                            (sut/get-pull-request-id "secret" "https://github.com/owner/name/pull/2")))))
+  (with-redefs [sut/get-pull-request-node-id test-args-to-pull-request-node-id]
+    (testing "filters by state"
+      (is (= "a-node-id" (sut/get-pull-request-id "secret" "https://github.com/owner/name/pull/1" true))))))
 
 (deftest test-get-issue-comment-id
   (with-redefs [core/http-get (fn [_ _ _] {:body "{\"node_id\": \"a-node-id\"}"})]
@@ -155,9 +182,9 @@
                 core/http-post (fn [_ _ _] {:body mark-ready-success})]
     (testing "marks pull request as ready for review"
       (is (has-value :permalink "https://github.com/eamonnsullivan/github-pr-lib/pull/3")
-             (sut/mark-ready-for-review
-              "secret"
-              "https://github.com/eamonnsullivan/github-pr-lib/pull/3"))))
+          (sut/mark-ready-for-review
+           "secret"
+           "https://github.com/eamonnsullivan/github-pr-lib/pull/3"))))
   (with-redefs [sut/get-pull-request-id (fn [_ _] "some-id")
                 core/http-post (fn [_ _ _] {:body mark-ready-failure})]
     (testing "Throws exception on error"
@@ -277,7 +304,11 @@
            "secret"
            "https://github.com/eamonnsullivan/github-pr-lib/pull/4"
            {:title "a commit" :body "some description"
-            :author-email "someone@somewhere.com"})))))
+            :author-email "someone@somewhere.com"}))
+      (is (has-value :permalink "https://github.com/eamonnsullivan/github-pr-lib/pull/4")
+          (sut/merge-pull-request
+           "secret"
+           "https://github.com/eamonnsullivan/github-pr-lib/pull/4")))))
 
 (deftest test-get-pull-request-info
   (with-redefs [core/http-post (fn [_ _ _] {:body pull-request-properties})

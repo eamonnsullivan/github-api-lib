@@ -1,6 +1,5 @@
 (ns eamonnsullivan.github-api-lib.repo-search
-  (:require [eamonnsullivan.github-api-lib :as core]
-            [clojure.data.json :as json]
+  (:require [eamonnsullivan.github-api-lib.core :as core]
             [clojure.java.io :as io]
             [clojure.string :as string]))
 

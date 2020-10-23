@@ -1,6 +1,6 @@
 (ns eamonnsullivan.github-api-lib.repo-search-test
   (:require [clojure.test :refer :all]
-            [eamonnsullivan.github-api-lib :as core]
+            [eamonnsullivan.github-api-lib.core :as core]
             [eamonnsullivan.github-api-lib.repo-search :as sut]))
 
 (def repo-search-response-1 (slurp "./test/eamonnsullivan/fixtures/repository-search-response-page-1.json"))
@@ -99,4 +99,8 @@
 (deftest testing-get-repos
   (with-redefs [sut/get-all-pages fake-all-pages]
     (testing "can override page-size"
-      (sut/get-repos "secret-token" "org" ["topic1" "topic2"] 2))))
+      (sut/get-repos "secret-token" "org" ["topic1" "topic2"] 2)))
+  (with-redefs [sut/get-all-pages (fn[_ _ _ page-size]
+                                    (is (= page-size sut/*default-page-size*))
+                                    {})]
+    (sut/get-repos "secret-token" "org" ["topic1"])))

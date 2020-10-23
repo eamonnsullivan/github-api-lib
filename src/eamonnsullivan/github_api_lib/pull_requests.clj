@@ -1,6 +1,5 @@
 (ns eamonnsullivan.github-api-lib.pull-requests
-  (:require [eamonnsullivan.github-api-lib :as core]
-            [eamonnsullivan.github-api-lib.utils :as utils]
+  (:require [eamonnsullivan.github-api-lib.core :as core]
             [clojure.data.json :as json]
             [clojure.java.io :as io]))
 
@@ -18,18 +17,15 @@
 (defn get-pull-request-node-id
   "Get the node id of a pull request using the v3 REST api, optionally
   filtered by state (\"open\", \"closed\", or the default of \"all\")"
-  ([access-token owner repo-name pullnum]
-   (get-pull-request-node-id access-token owner repo-name pullnum "all"))
-  ([access-token owner repo-name pull-number state]
-   (let [url (str "https://api.github.com/repos/" owner
-                  "/" repo-name
-                  "/pulls/" pull-number)
-         response (core/http-get access-token url (merge (core/request-opts access-token)
-                                                    {:throw-exceptions false
-                                                     :accept "application/vnd.github.v3+json"
-                                                     :query-params {"state" state}}))
-         body (json/read-str (:body response) :key-fn keyword)]
-     (:node_id body))))
+  [access-token owner repo-name pull-number state]
+  (let [url (str "https://api.github.com/repos/" owner
+                 "/" repo-name
+                 "/pulls/" pull-number)
+        response (core/http-get access-token url (merge (core/request-opts access-token)
+                                                        {:accept "application/vnd.github.v3+json"
+                                                         :query-params {"state" state}}))
+        body (json/read-str (:body response) :key-fn keyword)]
+    (:node_id body)))
 
 (defn get-comment-node-id
   "Get the node id of a pull request comment using the v3 REST API."
@@ -38,20 +34,18 @@
                  "/" repo
                  "/issues/comments/" comment-number)
         response (core/http-get access-token url (merge (core/request-opts access-token)
-                                                   {:throw-exceptions false
-                                                    :accept "application/vnd.github.v3+json"}))
+                                                        {:accept "application/vnd.github.v3+json"}))
         body (json/read-str (:body response) :key-fn keyword)]
     (:node_id body)))
 
 (defn get-repo-id
   "Get the unique ID value for a repository."
   ([access-token url]
-   (let [repo (utils/parse-repo url)
+   (let [repo (core/parse-repo url)
          owner (:owner repo)
          name (:name repo)]
-     (if repo
-       (get-repo-id access-token owner name)
-       nil)))
+     (when repo
+       (get-repo-id access-token owner name))))
   ([access-token owner repo-name]
    (let [variables {:owner owner :name repo-name}]
      (-> (core/make-graphql-post access-token get-repo-id-query variables)
@@ -67,8 +61,8 @@
   ([access-token url]
    (get-pull-request-id access-token url false))
   ([access-token url must-be-open?]
-   (let [repo (utils/parse-repo url)
-         prnum (utils/pull-request-number url)
+   (let [repo (core/parse-repo url)
+         prnum (core/pull-request-number url)
          owner (:owner repo)
          name (:name repo)]
      (or
@@ -78,10 +72,10 @@
 (defn get-issue-comment-id
   "Find the unique ID of an issue comment on a pull request. Returns nil if not found."
   [access-token comment-url]
-  (let [repo (utils/parse-repo comment-url)
+  (let [repo (core/parse-repo comment-url)
         owner (:owner repo)
         name (:name repo)
-        comment (:issueComment (utils/parse-comment-url comment-url))]
+        comment (:issueComment (core/parse-comment-url comment-url))]
     (or
      (get-comment-node-id access-token owner name comment)
      (throw (ex-info (format "Could not find comment: %s" comment-url) {})))))
@@ -138,10 +132,9 @@
   and :revertUrl.
   "
   ([access-token url pull-request]
-   (let [repo (utils/parse-repo url)]
-     (if repo
-       (create-pull-request access-token (merge pull-request repo))
-       (throw (ex-info (format "Unable to find Github repo at %s" url) repo)))))
+   (let [repo (core/parse-repo url)]
+     (when repo
+       (create-pull-request access-token (merge pull-request repo)))))
   ([access-token pull-request]
    (let [{owner :owner
           repo-name :name
