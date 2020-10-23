@@ -59,9 +59,8 @@ workflows:
     jobs:
       - test
   deploy:
-    when:
-      - or:
-          - << pipeline.parameters.run-deploy >>
-          - equal: [ main, << pipeline.git.branch >> ]
+    filters:
+      branches:
+        only: main
     jobs:
       - deploy
