@@ -55,7 +55,11 @@ jobs:
       - deploy-version
 
 workflows:
-  build-test-deploy:
+  build-test:
     jobs:
       - test
+  deploy:
+    when:
+      - equal: [ main, << pipeline.git.branch >> ]
+    jobs:
       - deploy
