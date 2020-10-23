@@ -1,12 +1,16 @@
 # configuration for a clojure/deps.edn application
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  tools-deps-executor:
     docker:
       - image: circleci/clojure:openjdk-11-tools-deps-1.10.1.697
     working_directory: ~/repo
     environment:
       JVM_OPTS: -Xmx3200m
+
+commands:
+  setup:
     steps:
       - checkout
       - restore_cache:
@@ -18,9 +22,40 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "deps.edn" }}
-      - run:
-          name: Run tests
-          command: clojure -M:test:runner
+
+  acceptance-tests:
+    steps:
       - run:
           name: check coverage
           command: clojure -M:test:coverage
+
+  deploy-version:
+    steps:
+      - run:
+          name: Update pom.xml
+          command: clojure -Spom
+      - run:
+          name: Build
+          command: clojure -A:jar
+      - run:
+          name: Deploy
+          command: clojure -A:deploy
+
+jobs:
+  test:
+    executor: tools-deps-executor
+    steps:
+      - setup
+      - shared-run-tests
+  deploy:
+    executor: tools-deps-executor
+    steps:
+      - setup
+      - shared-run-tests
+      - deploy-version
+
+workflows:
+  build-test-deploy:
+    jobs:
+      - test
+      - deploy
