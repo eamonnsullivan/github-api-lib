@@ -62,8 +62,8 @@ commands:
       - run:
           name: extract version from pom
           command: |
-            echo 'export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
-            echo 'Creating release v${CURRENT_VERSION}'
+            echo "export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $BASH_ENV
+            echo "Creating release v${CURRENT_VERSION}"
             source $BASH_ENV
       - github-release/create:
           tag: "v${CURRENT_VERSION}"
