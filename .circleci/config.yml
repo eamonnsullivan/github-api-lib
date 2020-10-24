@@ -45,9 +45,15 @@ commands:
       - run:
           name: Zip up jar file
           command: zip --junk-paths github-api-lib github-api-lib.jar
+      - persist-to-workspace:
+          root: ~/repo
+          paths:
+            - github-api-lib.zip
 
   create-release:
     steps:
+      - attach-workspace:
+          at: ~/repos
       - run:
           name: install mvn
           command: |
@@ -62,7 +68,7 @@ commands:
           tag: $CURRENT_VERSION
           title: "Version ${CURRENT_VERSION}"
           description: "Github-related API calls."
-          file-path: ./github-api-lib.zip
+          file-path: ~/repos/github-api-lib.zip
 
 
 
