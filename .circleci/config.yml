@@ -1,6 +1,9 @@
 # configuration for a clojure/deps.edn application
 version: 2.1
 
+orbs:
+  github-release: h-matsuo/github-release@0.1.3
+
 executors:
   tools-deps-executor:
     docker:
@@ -40,6 +43,26 @@ commands:
       - run:
           name: Deploy
           command: clojure -M:deploy
+      - run:
+          name: Zip up jar file
+          command: |
+            zip --junk-paths github-api-lib github-api-lib.jar
+            cp github-api-lib.zip /tmp
+
+  create-release:
+    description: Create a release
+    executor: github-release/default
+    steps:
+      - run:
+          name: extract version from pom
+          command: |
+            echo 'export CURRENT_VERSION=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
+            source $BASH_ENV
+      - github-release/create:
+          tag: $CURRENT_VERSION
+          file-path: /tmp/github-api-lib.zip
+
+
 
 jobs:
   test:
@@ -58,8 +81,20 @@ workflows:
   build-test:
     jobs:
       - test
+  build-test-release:
+    jobs:
       - deploy:
           context: clojars
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
+      - create-release:
+          context: github
+          requires:
+            - test
+            - deploy
           filters:
             branches:
               only: main
