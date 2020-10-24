@@ -62,11 +62,11 @@ commands:
       - run:
           name: extract version from pom
           command: |
-            echo 'export CURRENT_VERSION=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
+            echo 'export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)' >> $BASH_ENV
             source $BASH_ENV
       - github-release/create:
-          tag: $CURRENT_VERSION
-          title: "Version ${CURRENT_VERSION}"
+          tag: "v$CURRENT_VERSION"
+          title: "Version v${CURRENT_VERSION}"
           description: "Github-related API calls."
           file-path: ~/repos/github-api-lib.zip
 
