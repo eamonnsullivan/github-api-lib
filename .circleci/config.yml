@@ -48,7 +48,7 @@ commands:
       - run:
           name: extract version from pom
           command: |
-            mvn help:evaluate -Dexpression=project.version -q -DforceStdout" > current_version
+            mvn help:evaluate -Dexpression=project.version -q -DforceStdout > current_version
       - persist_to_workspace:
           root: ~/repo
           paths:
