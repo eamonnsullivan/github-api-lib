@@ -50,8 +50,6 @@ commands:
             cp github-api-lib.zip /tmp
 
   create-release:
-    description: Create a release
-    executor: github-release/default
     steps:
       - run:
           name: extract version from pom
@@ -76,6 +74,11 @@ jobs:
       - setup
       - acceptance-tests
       - deploy-version
+  release:
+    executor: github-release/default
+    steps:
+      - create-release
+
 
 workflows:
   build-test:
@@ -90,7 +93,7 @@ workflows:
           filters:
             branches:
               only: main
-      - create-release:
+      - release:
           context: github
           requires:
             - test
