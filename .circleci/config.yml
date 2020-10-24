@@ -53,7 +53,7 @@ commands:
   create-release:
     steps:
       - attach_workspace:
-          at: ~/repos
+          at: ~/repo
       - run:
           name: install mvn
           command: |
@@ -62,8 +62,7 @@ commands:
       - run:
           name: extract version from pom
           command: |
-            mvn help:evaluate -Dexpression=project.version -q -DforceStdout
-            echo "export CURRENT_VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`" >> $BASH_ENV
+            echo "export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $BASH_ENV
             echo "Creating release v${CURRENT_VERSION}"
             source $BASH_ENV
       - github-release/create:
