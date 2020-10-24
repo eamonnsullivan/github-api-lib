@@ -91,15 +91,15 @@ workflows:
       - deploy:
           context: clojars
           requires:
-            - test
+            - acceptance-test
           filters:
             branches:
               only: main
       - release:
           context: github
           requires:
-            - test
-            - deploy
+            - acceptance-test
+            - deploy-version
           filters:
             branches:
               only: main
