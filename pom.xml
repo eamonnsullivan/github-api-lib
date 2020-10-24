@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>eamonnsullivan</groupId>
   <artifactId>github-api-lib</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>github-api-lib</name>
-  <description>FIXME: my new library.</description>
+  <description>Library of Github API calls that I happen to need.</description>
   <url>https://github.com/eamonnsullivan/github-api-lib</url>
   <licenses>
     <license>
