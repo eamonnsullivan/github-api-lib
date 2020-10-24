@@ -83,23 +83,21 @@ jobs:
 
 
 workflows:
-  build-test:
-    jobs:
-      - test
   build-test-release:
     jobs:
+      - test
       - deploy:
           context: clojars
           requires:
-            - acceptance-test
+            - test
           filters:
             branches:
               only: main
       - release:
           context: github
           requires:
-            - acceptance-test
-            - deploy-version
+            - test
+            - deploy
           filters:
             branches:
               only: main
