@@ -58,6 +58,8 @@ commands:
             source $BASH_ENV
       - github-release/create:
           tag: $CURRENT_VERSION
+          title: "Version ${CURRENT_VERSION}"
+          description: "Github-related API calls."
           file-path: /tmp/github-api-lib.zip
 
 
