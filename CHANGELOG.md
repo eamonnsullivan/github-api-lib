@@ -1,24 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
-## [Unreleased]
-### Changed
-- Consolidates
 
-## [0.1.1] - 2020-10-21
-### Changed
-- Documentation on how to make the widgets.
-
-### Removed
-- `make-widget-sync` - we're all async, all the time.
-
-### Fixed
-- Fixed widget maker to keep working when daylight savings switches over.
-
-## 0.1.0 - 2020-10-21
-### Added
-- Files from the new template.
-- Widget maker public API - `make-widget-sync`.
-
-[Unreleased]: https://github.com/eamonnsullivan/github-api-lib/compare/0.1.1...HEAD
-[0.1.1]: https://github.com/eamonnsullivan/github-api-lib/compare/0.1.0...0.1.1
+## [0.1.2] - 2020-10-24
+Real initial release, with all the functionality that was previously in two separate libraries.
