@@ -46,6 +46,11 @@ commands:
           name: Zip up jar file
           command: zip --junk-paths github-api-lib github-api-lib.jar
       - run:
+          name: install mvn
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install maven
+      - run:
           name: extract version from pom
           command: |
             mvn help:evaluate -Dexpression=project.version -q -DforceStdout > current_version
@@ -59,11 +64,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/repo
-      - run:
-          name: install mvn
-          command: |
-            sudo apt-get update
-            sudo apt-get -y install maven
       - github-release/create:
           tag: "v$(cat ~/repo/current_version)"
           title: "Version v$(cat ~/repo/current_version)"
