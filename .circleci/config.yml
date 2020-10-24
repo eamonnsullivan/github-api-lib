@@ -48,8 +48,7 @@ commands:
       - run:
           name: extract version from pom
           command: |
-            echo "export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> current_version
-            echo "Creating release v${CURRENT_VERSION}"
+            mvn help:evaluate -Dexpression=project.version -q -DforceStdout" > current_version
       - persist_to_workspace:
           root: ~/repo
           paths:
