@@ -19,7 +19,6 @@ commands:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "deps.edn" }}
-            # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - save_cache:
           paths:
@@ -45,12 +44,15 @@ commands:
           command: clojure -M:deploy
       - run:
           name: Zip up jar file
-          command: |
-            zip --junk-paths github-api-lib github-api-lib.jar
-            cp github-api-lib.zip /tmp
+          command: zip --junk-paths github-api-lib github-api-lib.jar
 
   create-release:
     steps:
+      - run:
+          name: install mvn
+          command: |
+            sudo apt-get update
+            sudo apt-get -y install maven
       - run:
           name: extract version from pom
           command: |
@@ -60,7 +62,7 @@ commands:
           tag: $CURRENT_VERSION
           title: "Version ${CURRENT_VERSION}"
           description: "Github-related API calls."
-          file-path: /tmp/github-api-lib.zip
+          file-path: ./github-api-lib.zip
 
 
 
