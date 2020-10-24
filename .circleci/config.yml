@@ -45,10 +45,16 @@ commands:
       - run:
           name: Zip up jar file
           command: zip --junk-paths github-api-lib github-api-lib.jar
+      - run:
+          name: extract version from pom
+          command: |
+            echo "export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> current_version
+            echo "Creating release v${CURRENT_VERSION}"
       - persist_to_workspace:
           root: ~/repo
           paths:
             - github-api-lib.zip
+            - current_version
 
   create-release:
     steps:
@@ -59,15 +65,9 @@ commands:
           command: |
             sudo apt-get update
             sudo apt-get -y install maven
-      - run:
-          name: extract version from pom
-          command: |
-            echo "export CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $BASH_ENV
-            echo "Creating release v${CURRENT_VERSION}"
-            source $BASH_ENV
       - github-release/create:
-          tag: "v${CURRENT_VERSION}"
-          title: "Version v${CURRENT_VERSION}"
+          tag: "v$(cat ~/repo/current_version)"
+          title: "Version v$(cat ~/repo/current_version)"
           description: "Github-related API calls."
           file-path: ~/repos/github-api-lib.zip
 
