@@ -68,7 +68,7 @@ commands:
           tag: "v$(cat ~/repo/current_version)"
           title: "Version v$(cat ~/repo/current_version)"
           description: "Github-related API calls."
-          file-path: ~/repos/github-api-lib.zip
+          file-path: ~/repo/github-api-lib.zip
 
 
 
