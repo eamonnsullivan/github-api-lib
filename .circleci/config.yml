@@ -114,6 +114,10 @@ workflows:
           filters:
             branches:
               only: main
+      - artifact:
+          filters:
+            branches:
+              only: main
       - release:
           context: github
           requires:
