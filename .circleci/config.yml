@@ -42,6 +42,12 @@ commands:
       - run:
           name: Deploy
           command: clojure -M:deploy
+
+  store-artifact:
+    steps:
+      - run:
+          name: Create jar
+          command: clojure -M:jar
       - run:
           name: Zip up jar file
           command: zip --junk-paths github-api-lib github-api-lib.jar
@@ -84,9 +90,16 @@ jobs:
       - setup
       - acceptance-tests
       - deploy-version
+  artifact:
+    executor: tools-deps-executor
+    steps:
+      - setup
+      - store-artifact
   release:
     executor: github-release/default
     steps:
+      - setup
+      - store-artifact
       - create-release
 
 
@@ -106,6 +119,7 @@ workflows:
           requires:
             - test
             - deploy
+            - artifact
           filters:
             branches:
               only: main
