@@ -96,12 +96,9 @@ jobs:
       - setup
       - store-artifact
   release:
-    executors:
-      - github-release/default
-      - tools-deps-executor
+    executor: github-release/default
     steps:
       - setup
-      - store-artifact
       - create-release
 
 
