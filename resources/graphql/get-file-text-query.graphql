@@ -1,0 +1,16 @@
+query getRepoFile($owner: String!, $name: String!, $file: String!) {
+  repository(owner: $owner, name: $name) {
+    object(expression: $file) {
+      ... on Blob {
+        abbreviatedOid
+        byteSize
+        commitResourcePath
+        commitUrl
+        isBinary
+        isTruncated
+        oid
+        text
+      }
+    }
+  }
+}

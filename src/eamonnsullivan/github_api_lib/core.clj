@@ -1,6 +1,7 @@
 (ns eamonnsullivan.github-api-lib.core
   (:require [clj-http.client :as client]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [clojure.java.io :as io]))
 
 (def github-url "https://api.github.com/graphql")
 
@@ -18,6 +19,11 @@
   "Make a GET request to a url, with options"
   [access-token url opts]
   (client/get url (merge {:username access-token} opts)))
+
+(defn get-graphql
+  "Retrieve the GraphQL as a text blob"
+  [name]
+  (slurp (io/resource (format "graphql/%s.graphql" name))))
 
 (defn make-graphql-post
   "Make a GraphQL request to Github using the provided query/mutation
@@ -64,3 +70,22 @@
       {:pullRequestUrl (format "https://github.com/%s/%s/pull/%s" owner name number)
        :issueComment comment}
       (throw (ex-info (format "Could not parse comment from url: %s" comment-url) {})))))
+
+(defn iterate-pages
+  [page-getter results? value-getter next-getter]
+  (reify
+    clojure.lang.Seqable
+    (seq [_]
+      ((fn next [ret]
+         (when (results? ret)
+           (concat (value-getter ret)
+                   (when-some [k (next-getter ret)]
+                     (lazy-seq (next (page-getter k)))))))
+       (page-getter nil)))))
+
+(defn get-all-pages
+  [getter results? valuesfn]
+  (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
+                             (-> ret :data :search :pageInfo :endCursor)
+                             nil))]
+    (into [] (map identity (iterate-pages getter results? valuesfn get-next)))))

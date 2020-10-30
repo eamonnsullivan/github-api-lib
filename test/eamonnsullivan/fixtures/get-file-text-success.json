@@ -1,0 +1,16 @@
+{
+  "data": {
+    "repository": {
+      "object": {
+        "abbreviatedOid": "74c3092",
+        "byteSize": 1257,
+        "commitResourcePath": "/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+        "commitUrl": "https://github.com/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+        "isBinary": false,
+        "isTruncated": false,
+        "oid": "74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+        "text": "File contents."
+      }
+    }
+  }
+}

@@ -1,18 +1,6 @@
 (ns eamonnsullivan.github-api-lib.pull-requests
   (:require [eamonnsullivan.github-api-lib.core :as core]
-            [clojure.data.json :as json]
-            [clojure.java.io :as io]))
-
-(def get-repo-id-query (slurp (io/resource "graphql/get-repo-id-query.graphql")))
-(def create-pull-request-mutation (slurp (io/resource "graphql/create-pull-request-mutation.graphql")))
-(def update-pull-request-mutation (slurp (io/resource "graphql/update-pull-request-mutation.graphql")))
-(def mark-ready-for-review-mutation (slurp (io/resource "graphql/mark-ready-for-review-mutation.graphql")))
-(def add-comment-mutation (slurp (io/resource "graphql/add-comment-mutation.graphql")))
-(def edit-comment-mutation (slurp (io/resource "graphql/edit-comment-mutation.graphql")))
-(def close-pull-request-mutation (slurp (io/resource "graphql/close-pull-request-mutation.graphql")))
-(def reopen-pull-request-mutation (slurp (io/resource "graphql/reopen-pull-request-mutation.graphql")))
-(def merge-pull-request-mutation (slurp (io/resource "graphql/merge-pull-request-mutation.graphql")))
-(def pull-request-query (slurp (io/resource "graphql/pull-request-query.graphql")))
+            [clojure.data.json :as json]))
 
 (defn get-pull-request-node-id
   "Get the node id of a pull request using the v3 REST api, optionally
@@ -48,7 +36,10 @@
        (get-repo-id access-token owner name))))
   ([access-token owner repo-name]
    (let [variables {:owner owner :name repo-name}]
-     (-> (core/make-graphql-post access-token get-repo-id-query variables)
+     (-> (core/make-graphql-post
+          access-token
+          (core/get-graphql "get-repo-id-query")
+          variables)
          :data
          :repository
          :id))))
@@ -90,7 +81,10 @@
   [access-token pull-request-url]
   (let [pr-id (get-pull-request-id access-token pull-request-url)]
     (when pr-id
-      (-> (core/make-graphql-post access-token pull-request-query {:pullRequestId pr-id})
+      (-> (core/make-graphql-post
+           access-token
+           (core/get-graphql "pull-request-query")
+           {:pullRequestId pr-id})
           :data
           :node))))
 
@@ -151,7 +145,9 @@
                     :branch merging-branch
                     :draft draft}]
      (when repo-id
-       (-> (core/make-graphql-post access-token create-pull-request-mutation variables)
+       (-> (core/make-graphql-post
+            access-token
+            (core/get-graphql "create-pull-request-mutation") variables)
            :data
            :createPullRequest
            :pullRequest)))))
@@ -169,7 +165,11 @@
   and :revertUrl.
   "
   [access-token pull-request-url updated]
-  (-> (modify-pull-request access-token pull-request-url update-pull-request-mutation updated)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "update-pull-request-mutation")
+       updated)
       :data
       :updatePullRequest
       :pullRequest))
@@ -188,7 +188,10 @@
   and :revertUrl.
   "
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url mark-ready-for-review-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "mark-ready-for-review-mutation"))
       :data
       :markPullRequestReadyForReview
       :pullRequest))
@@ -205,7 +208,11 @@
   Returns information about the comment, including its :url and :body.
   "
   [access-token pull-request-url comment-body]
-  (-> (modify-pull-request access-token pull-request-url add-comment-mutation {:body comment-body})
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "add-comment-mutation")
+       {:body comment-body})
       :data
       :addComment
       :commentEdge
@@ -222,7 +229,11 @@
   Returns information about the comment, including its :url and :body.
   "
   [access-token comment-url comment-body]
-  (-> (modify-comment access-token comment-url edit-comment-mutation {:body comment-body})
+  (-> (modify-comment
+       access-token
+       comment-url
+       (core/get-graphql "edit-comment-mutation")
+       {:body comment-body})
       :data
       :updateIssueComment
       :issueComment))
@@ -239,7 +250,10 @@
   including :title, :body, :permalink, :additions, :deletions
   and :revertUrl."
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url close-pull-request-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "close-pull-request-mutation"))
       :data
       :closePullRequest
       :pullRequest))
@@ -256,7 +270,10 @@
   including :title, :body, :permalink, :additions, :deletions
   and :revertUrl."
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url reopen-pull-request-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "reopen-pull-request-mutation"))
       :data
       :reopenPullRequest
       :pullRequest))
@@ -284,7 +301,11 @@
          expected-head-ref (:headRefOid prinfo)]
      (if expected-head-ref
        (let [opts (merge {:mergeMethod "SQUASH"} merge-options {:expectedHeadRef expected-head-ref})]
-         (-> (modify-pull-request access-token pull-request-url merge-pull-request-mutation opts)
+         (-> (modify-pull-request
+              access-token
+              pull-request-url
+              (core/get-graphql "merge-pull-request-mutation")
+              opts)
              :data
              :mergePullRequest
              :pullRequest))

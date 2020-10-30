@@ -77,3 +77,34 @@
     (is (thrown-with-msg? RuntimeException
                           #"Could not parse comment from url: https://news.bbc.co.uk"
                           (sut/parse-comment-url "https://news.bbc.co.uk")))))
+
+
+(defn fake-get-pages
+  [cursor]
+  (let [first-page {:data
+                    {:search
+                     {:repositoryCount 3
+                      :nodes [{:name "one"}
+                              {:name "two"}]
+                      :pageInfo {:hasNextPage true, :endCursor "cursor"}}}}
+        last-page {:data
+                   {:search
+                    {:repositoryCount 3
+                     :nodes [{:name "three"}]
+                     :pageInfo {:hasNextPage false, :endCursor "cursor2"}}}}]
+    (if-not cursor
+      first-page
+      last-page)))
+
+(deftest test-iterate-pages
+  (testing "gets the next page"
+    (is (= "three"
+           (-> (sut/iterate-pages
+                fake-get-pages
+                (fn [r] (some? (-> r :data :search :nodes)))
+                #(-> % :data :search :nodes)
+                (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
+                            (-> ret :data :search :pageInfo :endCursor)
+                            nil)))
+               last
+               :name)))))
