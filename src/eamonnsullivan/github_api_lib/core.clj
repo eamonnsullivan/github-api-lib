@@ -72,18 +72,29 @@
       (throw (ex-info (format "Could not parse comment from url: %s" comment-url) {})))))
 
 (defn iterate-pages
-  [page-getter results? value-getter next-getter]
+  "Iterate through the pages of a Github GraphQL search.
+
+  pager -- cursor -> page function to get a page of results.
+  results? -- page -> boolean function that returns true if the page contains values.
+  vf -- page -> values function that extracts the values from a page.
+  kf -- page -> cursor function that extracts the cursor for the next page, or nil if there isn't one."
+  [pager results? vf kf]
   (reify
     clojure.lang.Seqable
     (seq [_]
       ((fn next [ret]
          (when (results? ret)
-           (concat (value-getter ret)
-                   (when-some [k (next-getter ret)]
-                     (lazy-seq (next (page-getter k)))))))
-       (page-getter nil)))))
+           (concat (vf ret)
+                   (when-some [k (kf ret)]
+                     (lazy-seq (next (pager k)))))))
+       (pager nil)))))
 
 (defn get-all-pages
+  "Convenience function for getting all of the results from a paged search.
+
+  getter -- function that returns a single page, given a cursor string.
+  results? -- function that returns a boolean indicate whether the page contains values.
+  valuesfn -- function to extract the values from a page."
   [getter results? valuesfn]
   (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
                              (-> ret :data :search :pageInfo :endCursor)

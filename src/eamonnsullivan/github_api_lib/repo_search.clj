@@ -24,7 +24,7 @@
    {:first page-size :query (get-query org topics) :after cursor}))
 
 (defn get-repos
-  "Get information about repos in a given organisation, with the specified topics"
+  "Get information about repos in a given organisation, with the specified topics."
   ([access-token org topics] (get-repos access-token org topics *default-page-size*))
   ([access-token org topics page-size]
    (let [get-page (partial get-page-of-repos access-token org topics page-size)
