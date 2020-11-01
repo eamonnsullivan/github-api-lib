@@ -74,19 +74,19 @@
 (defn iterate-pages
   "Iterate through the pages of a Github GraphQL search.
 
-  pager -- cursor -> page function to get a page of results.
-  results? -- page -> boolean function that returns true if the page contains values.
-  vf -- page -> values function that extracts the values from a page.
-  kf -- page -> cursor function that extracts the cursor for the next page, or nil if there isn't one."
+  pager: cursor -> page function to get a page of results.
+  results?: page -> boolean function that returns true if the page contains values.
+  vf: page -> values function that extracts the values from a page.
+  kf: page -> cursor function that extracts the cursor for the next page, or nil if there isn't one."
   [pager results? vf kf]
   (reify
     clojure.lang.Seqable
     (seq [_]
       ((fn next [ret]
          (when (results? ret)
-           (concat (vf ret)
-                   (when-some [k (kf ret)]
-                     (lazy-seq (next (pager k)))))))
+           (cons (vf ret)
+                 (when-some [k (kf ret)]
+                   (lazy-seq (next (pager k)))))))
        (pager nil)))))
 
 (defn get-all-pages
@@ -99,4 +99,4 @@
   (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
                              (-> ret :data :search :pageInfo :endCursor)
                              nil))]
-    (into [] (map identity (iterate-pages getter results? valuesfn get-next)))))
+    (into [] (flatten (map identity (iterate-pages getter results? valuesfn get-next))))))
