@@ -127,7 +127,8 @@ Retrieve information about a file in a repository, on a particular branch. You c
 
 You can also try several files and the first one found is returned.
 ```clojure
-(files/get-first-file token "eamonnsullivan" "github-api-lib" "HEAD" ["build.sbt" ".nvmrc" "deps.edn" "project.edn"])
+(files/get-first-file token "eamonnsullivan" "github-api-lib" "HEAD"
+["build.sbt" ".nvmrc" "deps.edn" "project.edn"])
 
 {:commitResourcePath
  "/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
