@@ -71,32 +71,63 @@
        :issueComment comment}
       (throw (ex-info (format "Could not parse comment from url: %s" comment-url) {})))))
 
-(defn iterate-pages
-  "Iterate through the pages of a Github GraphQL search.
+(defn iteration
+  "Taken from https://clojure.atlassian.net/browse/CLJ-2555.
+   This function can just be removed when we start using 1.11 of Clojure.
 
-  pager: cursor -> page function to get a page of results.
-  results?: page -> boolean function that returns true if the page contains values.
-  vf: page -> values function that extracts the values from a page.
-  kf: page -> cursor function that extracts the cursor for the next page, or nil if there isn't one."
-  [pager results? vf kf]
+   creates a seqable/reducible given step!,
+   a function of some (opaque continuation data) k
+
+   step! - fn of k/nil to (opaque) 'ret'
+
+   :some? - fn of ret -> truthy, indicating there is a value
+            will not call vf/kf nor continue when false
+   :vf - fn of ret -> v, the values produced by the iteration
+   :kf - fn of ret -> next-k or nil (will not continue)
+   :initk - the first value passed to step!
+
+   vf, kf default to identity, some? defaults to some?, initk defaults to nil
+
+   it is presumed that step! with non-initk is unreproducible/non-idempotent
+   if step! with initk is unreproducible, it is on the consumer to not consume twice"
+  [step! & {:keys [vf kf some? initk]
+            :or {vf identity
+                 kf identity
+                 some? some?
+                 initk nil}}]
   (reify
-    clojure.lang.Seqable
-    (seq [_]
-      ((fn next [ret]
-         (when (results? ret)
-           (cons (vf ret)
-                 (when-some [k (kf ret)]
-                   (lazy-seq (next (pager k)))))))
-       (pager nil)))))
+   clojure.lang.Seqable
+   (seq [_]
+        ((fn next [ret]
+           (when (some? ret)
+             (cons (vf ret)
+                   (when-some [k (kf ret)]
+                     (lazy-seq (next (step! k)))))))
+         (step! initk)))
+   clojure.lang.IReduceInit
+   (reduce [_ rf init]
+           (loop [acc init
+                  ret (step! initk)]
+             (if (some? ret)
+               (let [acc (rf acc (vf ret))]
+                 (if (reduced? acc)
+                   @acc
+                   (if-some [k (kf ret)]
+                     (recur acc (step! k))
+                     acc)))
+               acc)))))
 
 (defn get-all-pages
   "Convenience function for getting all of the results from a paged search.
 
-  getter -- function that returns a single page, given a cursor string.
-  results? -- function that returns a boolean indicate whether the page contains values.
-  valuesfn -- function to extract the values from a page."
+   getter: function that returns a single page, given a cursor string.
+   results?: function that returns a boolean indicating whether the current page contains values.
+   valuesfn: function to extract the values from a page.
+
+   Returns a flattened, realised sequence with all of the result. Don't
+   use this on an infinite or very big sequence."
   [getter results? valuesfn]
   (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
                              (-> ret :data :search :pageInfo :endCursor)
                              nil))]
-    (into [] (flatten (map identity (iterate-pages getter results? valuesfn get-next))))))
+    (into [] (flatten (map identity (iteration getter :vf valuesfn :kf get-next :some? results?))))))

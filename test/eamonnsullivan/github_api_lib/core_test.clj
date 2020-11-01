@@ -19,7 +19,7 @@
                    {:accept "application/vnd.github.v3+json"}))))))
 
 (defn test-args-to-post
-  [url opts]
+  [_ opts]
   (is (= :json (:content-type opts)))
   "{}")
 
@@ -99,13 +99,13 @@
 (deftest test-iterate-pages
   (testing "gets the next page"
     (is (= "three"
-           (-> (sut/iterate-pages
+           (-> (sut/iteration
                 fake-get-pages
-                (fn [r] (some? (-> r :data :search :nodes)))
-                #(-> % :data :search :nodes)
-                (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
-                            (-> ret :data :search :pageInfo :endCursor)
-                            nil)))
+                :some? (fn [r] (some? (-> r :data :search :nodes)))
+                :vf #(-> % :data :search :nodes)
+                :kf (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
+                                (-> ret :data :search :pageInfo :endCursor)
+                                nil)))
                last
                last
                :name)))))
