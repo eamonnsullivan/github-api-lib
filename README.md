@@ -103,6 +103,45 @@ The EDN returned will contain basic information about the repos found. For examp
 ]
 ```
 
+### Getting files in repos
+
+Retrieve information about a file in a repository, on a particular branch. You can use "HEAD" for the branch to retrieve a file from the default branch. The information returns includes `:byteSize` and `:text`.
+
+```clojure
+(require '[eamonnsullivan.github-api-lib.files :as files])
+(files/get-file token "eamonnsullivan" "github-api-lib" "HEAD" "README.md")
+
+{:commitResourcePath
+ "/eamonnsullivan/github-api-lib/commit/0805f4b95f5e01275e5962e0f8ed23def5129419",
+ :byteSize 4296,
+ :filepath "README.md",
+ :abbreviatedOid "0805f4b",
+ :isBinary false,
+ :oid "0805f4b95f5e01275e5962e0f8ed23def5129419",
+ :commitUrl
+ "https://github.com/eamonnsullivan/github-api-lib/commit/0805f4b95f5e01275e5962e0f8ed23def5129419",
+ :isTruncated false,
+ :text
+ "# github-api-lib\n\nA small, very simple..."}
+```
+
+You can also try several files and the first one found is returned.
+```clojure
+(files/get-first-file token "eamonnsullivan" "github-api-lib" "HEAD" ["build.sbt" ".nvmrc" "deps.edn" "project.edn"])
+
+{:commitResourcePath
+ "/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+ :byteSize 1257,
+ :filepath "deps.edn",
+ :abbreviatedOid "74c3092",
+ :isBinary false,
+ :oid "74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+ :commitUrl
+ "https://github.com/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+ :isTruncated false,
+ :text
+ "{:paths [\"src\" \"resources\"]\n :deps ..."}
+```
 ## Development Notes
 
 To run the project's tests:

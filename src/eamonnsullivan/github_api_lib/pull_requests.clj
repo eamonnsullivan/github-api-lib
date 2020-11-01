@@ -111,19 +111,17 @@
 
 (defn create-pull-request
   "Create a pull request on Github repository.
-  Arguments:
-  * access-token -- the Github access token to use. Must have repo permissions.
-  * url -- the URL of the repo (optional). The URL can omit the
-  https://github.com/, e.g. owner/repo-name.
-  * pull-request -- a map describing the pull
-  request. Keys: :title, :base (the base branch), :branch (the branch
-  you want to merge) and (if a URL isn't provided) the :owner (or
-  organisation) and :name of the repo. Optional key :draft
-  (default: true) indicates whether the pull request
-  is in a draft state and not ready for review.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * url -- the URL of the repo (optional). The URL can omit the https://github.com/, e.g. owner/repo-name.
+   * pull-request -- a map describing the pull request. Keys: :title, :base (the base branch),
+     :branch (the branch you want to merge) and (if a URL isn't provided) the :owner (or organisation)
+     and :name of the repo. Optional key :draft (default: true) indicates whether the pull request
+     is in a draft state and not ready for review.
+
+   Returns a map describing the pull request, including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl.
   "
   ([access-token url pull-request]
    (let [repo (core/parse-repo url)]
@@ -154,15 +152,15 @@
 
 (defn update-pull-request
   "Update an existing pull request.
-  Argments:
-  * access-token -- the Github access token to use. Must have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * updated -- a map describing the update. The keys: :title, :body.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   Argments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * updated -- a map describing the update. The keys: :title, :body.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl.
   "
   [access-token pull-request-url updated]
   (-> (modify-pull-request
@@ -176,16 +174,16 @@
 
 (defn mark-ready-for-review
   "Mark a pull request as ready for review.
-  This effectively just toggles the :draft property of the pull request to false.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   This effectively just toggles the :draft property of the pull request to false.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl.
   "
   [access-token pull-request-url]
   (-> (modify-pull-request
@@ -198,14 +196,14 @@
 
 (defn add-pull-request-comment
   "Add a top-level comment to a pull request.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * comment-body -- the comment to add.
-  Returns information about the comment, including its :url and :body.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * comment-body -- the comment to add.
+
+   Returns information about the comment, including its :url and :body.
   "
   [access-token pull-request-url comment-body]
   (-> (modify-pull-request
@@ -219,14 +217,15 @@
       :node))
 
 (defn edit-pull-request-comment
-  "Changes the body of a comment
-  Arguments:
-  * access-token -- the Github access token to use.
-  * comment-url -- e.g., the full (e.g.,
-  https://github.com/owner/name/pull/4#issuecomment-702092682) or
-  partial (owner/name/pull/4#issuecomment-702092682) URL of the comment.
-  * comment-body -- the new body of the comment.
-  Returns information about the comment, including its :url and :body.
+  "Changes the body of a comment.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * comment-url -- e.g., the full (e.g., https://github.com/owner/name/pull/4#issuecomment-702092682) or
+     partial (owner/name/pull/4#issuecomment-702092682) URL of the comment.
+   * comment-body -- the new body of the comment.
+
+   Returns information about the comment, including its :url and :body.
   "
   [access-token comment-url comment-body]
   (-> (modify-comment
@@ -240,15 +239,15 @@
 
 (defn close-pull-request
   "Change the status of a pull request to closed.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request,
+   including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl."
   [access-token pull-request-url]
   (-> (modify-pull-request
        access-token
@@ -260,15 +259,15 @@
 
 (defn reopen-pull-request
   "Change the status of a pull request to open.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request,
+   including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl."
   [access-token pull-request-url]
   (-> (modify-pull-request
        access-token
@@ -280,20 +279,18 @@
 
 (defn merge-pull-request
   "Merge a pull request.
-  Arguments:
-  * access-token -- the Github access token to use. Must have repo
-  permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * merge-options -- a map with keys that can include :title (the
-  headline of the commit), :body (any body description of the
-  commit), :mergeMethod (default \"SQUASH\", but can also be
-  \"MERGE\" or \"REBASE\") and :authorEmail.
-  All of these input fields are optional.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * merge-options -- a map with keys that can include :title (the headline of the
+     commit), :body (any body description of the commit), :mergeMethod (default
+     \"SQUASH\", but can also be \"MERGE\" or \"REBASE\") and :authorEmail.
+     All of these input fields are optional.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl."
   ([access-token pull-request-url]
    (merge-pull-request access-token pull-request-url nil))
   ([access-token pull-request-url merge-options]
