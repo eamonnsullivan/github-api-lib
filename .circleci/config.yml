@@ -23,6 +23,7 @@ commands:
       - save_cache:
           paths:
             - ~/.m2
+            - .cpcache
           key: v1-dependencies-{{ checksum "deps.edn" }}
 
   acceptance-tests:

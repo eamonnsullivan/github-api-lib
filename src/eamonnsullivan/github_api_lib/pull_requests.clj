@@ -1,18 +1,6 @@
 (ns eamonnsullivan.github-api-lib.pull-requests
   (:require [eamonnsullivan.github-api-lib.core :as core]
-            [clojure.data.json :as json]
-            [clojure.java.io :as io]))
-
-(def get-repo-id-query (slurp (io/resource "graphql/get-repo-id-query.graphql")))
-(def create-pull-request-mutation (slurp (io/resource "graphql/create-pull-request-mutation.graphql")))
-(def update-pull-request-mutation (slurp (io/resource "graphql/update-pull-request-mutation.graphql")))
-(def mark-ready-for-review-mutation (slurp (io/resource "graphql/mark-ready-for-review-mutation.graphql")))
-(def add-comment-mutation (slurp (io/resource "graphql/add-comment-mutation.graphql")))
-(def edit-comment-mutation (slurp (io/resource "graphql/edit-comment-mutation.graphql")))
-(def close-pull-request-mutation (slurp (io/resource "graphql/close-pull-request-mutation.graphql")))
-(def reopen-pull-request-mutation (slurp (io/resource "graphql/reopen-pull-request-mutation.graphql")))
-(def merge-pull-request-mutation (slurp (io/resource "graphql/merge-pull-request-mutation.graphql")))
-(def pull-request-query (slurp (io/resource "graphql/pull-request-query.graphql")))
+            [clojure.data.json :as json]))
 
 (defn get-pull-request-node-id
   "Get the node id of a pull request using the v3 REST api, optionally
@@ -48,7 +36,10 @@
        (get-repo-id access-token owner name))))
   ([access-token owner repo-name]
    (let [variables {:owner owner :name repo-name}]
-     (-> (core/make-graphql-post access-token get-repo-id-query variables)
+     (-> (core/make-graphql-post
+          access-token
+          (core/get-graphql "get-repo-id-query")
+          variables)
          :data
          :repository
          :id))))
@@ -90,7 +81,10 @@
   [access-token pull-request-url]
   (let [pr-id (get-pull-request-id access-token pull-request-url)]
     (when pr-id
-      (-> (core/make-graphql-post access-token pull-request-query {:pullRequestId pr-id})
+      (-> (core/make-graphql-post
+           access-token
+           (core/get-graphql "pull-request-query")
+           {:pullRequestId pr-id})
           :data
           :node))))
 
@@ -117,19 +111,17 @@
 
 (defn create-pull-request
   "Create a pull request on Github repository.
-  Arguments:
-  * access-token -- the Github access token to use. Must have repo permissions.
-  * url -- the URL of the repo (optional). The URL can omit the
-  https://github.com/, e.g. owner/repo-name.
-  * pull-request -- a map describing the pull
-  request. Keys: :title, :base (the base branch), :branch (the branch
-  you want to merge) and (if a URL isn't provided) the :owner (or
-  organisation) and :name of the repo. Optional key :draft
-  (default: true) indicates whether the pull request
-  is in a draft state and not ready for review.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * url -- the URL of the repo (optional). The URL can omit the https://github.com/, e.g. owner/repo-name.
+   * pull-request -- a map describing the pull request. Keys: :title, :base (the base branch),
+     :branch (the branch you want to merge) and (if a URL isn't provided) the :owner (or organisation)
+     and :name of the repo. Optional key :draft (default: true) indicates whether the pull request
+     is in a draft state and not ready for review.
+
+   Returns a map describing the pull request, including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl.
   "
   ([access-token url pull-request]
    (let [repo (core/parse-repo url)]
@@ -151,132 +143,154 @@
                     :branch merging-branch
                     :draft draft}]
      (when repo-id
-       (-> (core/make-graphql-post access-token create-pull-request-mutation variables)
+       (-> (core/make-graphql-post
+            access-token
+            (core/get-graphql "create-pull-request-mutation") variables)
            :data
            :createPullRequest
            :pullRequest)))))
 
 (defn update-pull-request
   "Update an existing pull request.
-  Argments:
-  * access-token -- the Github access token to use. Must have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * updated -- a map describing the update. The keys: :title, :body.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   Argments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * updated -- a map describing the update. The keys: :title, :body.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl.
   "
   [access-token pull-request-url updated]
-  (-> (modify-pull-request access-token pull-request-url update-pull-request-mutation updated)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "update-pull-request-mutation")
+       updated)
       :data
       :updatePullRequest
       :pullRequest))
 
 (defn mark-ready-for-review
   "Mark a pull request as ready for review.
-  This effectively just toggles the :draft property of the pull request to false.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl.
+
+   This effectively just toggles the :draft property of the pull request to false.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl.
   "
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url mark-ready-for-review-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "mark-ready-for-review-mutation"))
       :data
       :markPullRequestReadyForReview
       :pullRequest))
 
 (defn add-pull-request-comment
   "Add a top-level comment to a pull request.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * comment-body -- the comment to add.
-  Returns information about the comment, including its :url and :body.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * comment-body -- the comment to add.
+
+   Returns information about the comment, including its :url and :body.
   "
   [access-token pull-request-url comment-body]
-  (-> (modify-pull-request access-token pull-request-url add-comment-mutation {:body comment-body})
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "add-comment-mutation")
+       {:body comment-body})
       :data
       :addComment
       :commentEdge
       :node))
 
 (defn edit-pull-request-comment
-  "Changes the body of a comment
-  Arguments:
-  * access-token -- the Github access token to use.
-  * comment-url -- e.g., the full (e.g.,
-  https://github.com/owner/name/pull/4#issuecomment-702092682) or
-  partial (owner/name/pull/4#issuecomment-702092682) URL of the comment.
-  * comment-body -- the new body of the comment.
-  Returns information about the comment, including its :url and :body.
+  "Changes the body of a comment.
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * comment-url -- e.g., the full (e.g., https://github.com/owner/name/pull/4#issuecomment-702092682) or
+     partial (owner/name/pull/4#issuecomment-702092682) URL of the comment.
+   * comment-body -- the new body of the comment.
+
+   Returns information about the comment, including its :url and :body.
   "
   [access-token comment-url comment-body]
-  (-> (modify-comment access-token comment-url edit-comment-mutation {:body comment-body})
+  (-> (modify-comment
+       access-token
+       comment-url
+       (core/get-graphql "edit-comment-mutation")
+       {:body comment-body})
       :data
       :updateIssueComment
       :issueComment))
 
 (defn close-pull-request
   "Change the status of a pull request to closed.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request,
+   including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl."
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url close-pull-request-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "close-pull-request-mutation"))
       :data
       :closePullRequest
       :pullRequest))
 
 (defn reopen-pull-request
   "Change the status of a pull request to open.
-  Arguments:
-  * access-token -- the Github access token to use. Must
-  have repo permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+
+   Returns a map describing the pull request,
+   including :title, :body, :permalink, :additions, :deletions
+   and :revertUrl."
   [access-token pull-request-url]
-  (-> (modify-pull-request access-token pull-request-url reopen-pull-request-mutation)
+  (-> (modify-pull-request
+       access-token
+       pull-request-url
+       (core/get-graphql "reopen-pull-request-mutation"))
       :data
       :reopenPullRequest
       :pullRequest))
 
 (defn merge-pull-request
   "Merge a pull request.
-  Arguments:
-  * access-token -- the Github access token to use. Must have repo
-  permissions.
-  * pull-request-url -- the full (e.g.,
-  https://github.com/owner/name/pull/1) or
-  partial (owner/name/pull/1) URL of the pull request.
-  * merge-options -- a map with keys that can include :title (the
-  headline of the commit), :body (any body description of the
-  commit), :mergeMethod (default \"SQUASH\", but can also be
-  \"MERGE\" or \"REBASE\") and :authorEmail.
-  All of these input fields are optional.
-  Returns a map describing the pull request,
-  including :title, :body, :permalink, :additions, :deletions
-  and :revertUrl."
+
+   Arguments:
+   * access-token -- the Github access token to use. Must have repo permissions.
+   * pull-request-url -- the full (e.g., https://github.com/owner/name/pull/1) or
+     partial (owner/name/pull/1) URL of the pull request.
+   * merge-options -- a map with keys that can include :title (the headline of the
+     commit), :body (any body description of the commit), :mergeMethod (default
+     \"SQUASH\", but can also be \"MERGE\" or \"REBASE\") and :authorEmail.
+     All of these input fields are optional.
+
+   Returns a map describing the pull request, including :title, :body, :permalink,
+   :additions, :deletions and :revertUrl."
   ([access-token pull-request-url]
    (merge-pull-request access-token pull-request-url nil))
   ([access-token pull-request-url merge-options]
@@ -284,7 +298,11 @@
          expected-head-ref (:headRefOid prinfo)]
      (if expected-head-ref
        (let [opts (merge {:mergeMethod "SQUASH"} merge-options {:expectedHeadRef expected-head-ref})]
-         (-> (modify-pull-request access-token pull-request-url merge-pull-request-mutation opts)
+         (-> (modify-pull-request
+              access-token
+              pull-request-url
+              (core/get-graphql "merge-pull-request-mutation")
+              opts)
              :data
              :mergePullRequest
              :pullRequest))

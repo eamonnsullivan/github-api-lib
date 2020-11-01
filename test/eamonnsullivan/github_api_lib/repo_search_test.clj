@@ -68,39 +68,31 @@
                                :languages {:nodes [{:name "Javascript"}]}}]
                       :pageInfo {:hasNextPage true, :endCursor "cursor"}}}}
         last-page {:data
-                    {:search
-                     {:repositoryCount 3
-                      :nodes [{:name "three"
-                               :description "..."
-                               :url "..."
-                               :sshUrl "..."
-                               :updatedAt "2020-04-09T11:02:28Z"
-                               :languages {:nodes [{:name "Javascript"}]}}]
-                      :pageInfo {:hasNextPage false, :endCursor "cursor2"}}}}]
+                   {:search
+                    {:repositoryCount 3
+                     :nodes [{:name "three"
+                              :description "..."
+                              :url "..."
+                              :sshUrl "..."
+                              :updatedAt "2020-04-09T11:02:28Z"
+                              :languages {:nodes [{:name "Javascript"}]}}]
+                     :pageInfo {:hasNextPage false, :endCursor "cursor2"}}}}]
     (if-not cursor
       first-page
       last-page)))
 
-(deftest test-get-all-pages
+(deftest test-get-repos
   (with-redefs [sut/get-page-of-repos fake-paging-responses]
     (testing "follows pages"
-      (let [result (sut/get-all-pages "secret-token" "test" ["test"] 2)]
-         (is (= "three" (-> result last :name)))
-         (is (= 3 (count result)))))))
-
-(defn fake-all-pages
-  [_ _ _ page-size]
-  (let [response {}]
-    (deftest testing-arguments
-      (testing "gets called with page-size set"
-        (is (= 2 page-size))))
-    response))
-
-(deftest testing-get-repos
-  (with-redefs [sut/get-all-pages fake-all-pages]
+      (let [result (sut/get-repos "secret-token" "test" ["test"] 2)]
+        (is (= "three" (-> result last :name)))
+        (is (= 3 (count result))))))
+  (with-redefs [sut/get-page-of-repos (fn[_ _ _ page-size _]
+                                        (is (= page-size 2))
+                                        {})]
     (testing "can override page-size"
       (sut/get-repos "secret-token" "org" ["topic1" "topic2"] 2)))
-  (with-redefs [sut/get-all-pages (fn[_ _ _ page-size]
-                                    (is (= page-size sut/*default-page-size*))
-                                    {})]
+  (with-redefs [sut/get-page-of-repos (fn[_ _ _ page-size _]
+                                        (is (= page-size sut/*default-page-size*))
+                                        {})]
     (sut/get-repos "secret-token" "org" ["topic1"])))
