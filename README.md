@@ -119,7 +119,7 @@ Retrieve information about a file in a repository, on a particular branch. You c
  :isBinary false,
  :oid "0805f4b95f5e01275e5962e0f8ed23def5129419",
  :commitUrl
- "https://github.com/eamonnsullivan/github-api-lib/commit/0805f4b95f5e01275e5962e0f8ed23def5129419",
+ "https://github.com/eamonnsullivan/github-api-lib/commit/...",
  :isTruncated false,
  :text
  "# github-api-lib\n\nA small, very simple..."}
@@ -137,7 +137,7 @@ You can also try several files and the first one found is returned.
  :isBinary false,
  :oid "74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
  :commitUrl
- "https://github.com/eamonnsullivan/github-api-lib/commit/74c3092ef552681a7fa5c1a96b3a11479b4f0a28",
+ "https://github.com/eamonnsullivan/github-api-lib/commit/...",
  :isTruncated false,
  :text
  "{:paths [\"src\" \"resources\"]\n :deps ..."}
