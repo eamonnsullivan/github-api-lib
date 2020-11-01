@@ -78,34 +78,69 @@
                           #"Could not parse comment from url: https://news.bbc.co.uk"
                           (sut/parse-comment-url "https://news.bbc.co.uk")))))
 
-
 (defn fake-get-pages
   [cursor]
   (let [first-page {:data
                     {:search
                      {:repositoryCount 3
-                      :nodes [{:name "one"}
-                              {:name "two"}]
+                      :nodes [{:name "one", :size 25}
+                              {:name "two", :size 25}]
                       :pageInfo {:hasNextPage true, :endCursor "cursor"}}}}
         last-page {:data
                    {:search
                     {:repositoryCount 3
-                     :nodes [{:name "three"}]
+                     :nodes [{:name "three", :size 50}]
                      :pageInfo {:hasNextPage false, :endCursor "cursor2"}}}}]
     (if-not cursor
       first-page
       last-page)))
 
-(deftest test-iterate-pages
+(deftest test-iteration
   (testing "gets the next page"
     (is (= "three"
            (-> (sut/iteration
                 fake-get-pages
-                :some? (fn [r] (some? (-> r :data :search :nodes)))
+                :some? #(some? (-> % :data :search :nodes))
                 :vf #(-> % :data :search :nodes)
-                :kf (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
-                                (-> ret :data :search :pageInfo :endCursor)
-                                nil)))
-               last
-               last
+                :kf #(if (-> % :data :search :pageInfo :hasNextPage)
+                       (-> % :data :search :pageInfo :endCursor)
+                       nil))
+               last ; last page
+               last ; last value on that page
                :name)))))
+
+(deftest test-iteration-reduced
+  (let [answer (sut/iteration
+                fake-get-pages
+                :some? #(some? (-> % :data :search :nodes))
+                :vf #(-> % :data :search :nodes)
+                :kf #(if (-> % :data :search :pageInfo :hasNextPage)
+                       (-> % :data :search :pageInfo :endCursor)
+                       nil))]
+    (testing "sums the values on pages"
+      (is (= 100
+             (reduce
+              (fn [acc page] (apply + acc (map :size page)))
+              0
+              answer))))
+    (testing "uses reduced to short circuit some results"
+      (is (= 40
+             (reduce
+              (fn [acc page] (let [size (apply + acc (map :size page))]
+                               (if (> size 40)
+                                 (reduced 40)
+                                 size)))
+              0
+              answer)))))
+  (testing "handles no results correctly"
+    (is (= 42
+           (reduce
+            (fn [acc page] (apply + acc (map :size page)))
+            42
+            (sut/iteration
+             fake-get-pages
+             :some? #(some? (-> % :data :search :not-there))
+             :vf #(-> % :data :search :nodes)
+             :kf #(if (-> % :data :search :pageInfo :hasNextPage)
+                    (-> % :data :search :pageInfo :endCursor)
+                    nil)))))))

@@ -130,4 +130,7 @@
   (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
                              (-> ret :data :search :pageInfo :endCursor)
                              nil))]
-    (into [] (flatten (map identity (iteration getter :vf valuesfn :kf get-next :some? results?))))))
+    (vec (reduce
+          (fn [acc page] (concat acc page))
+          []
+          (iteration getter :vf valuesfn :kf get-next :some? results?)))))
