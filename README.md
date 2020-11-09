@@ -2,10 +2,9 @@
 
 A small, very simple library with bits and pieces of Github's GraphQL and REST API, in one place for my own convenience.
 
-## Usage
-[![CircleCI](https://circleci.com/gh/eamonnsullivan/github-api-lib.svg?style=shield)](https://circleci.com/gh/eamonnsullivan/github-api-lib/tree/main)
+[![CircleCI](https://circleci.com/gh/eamonnsullivan/github-api-lib.svg?style=shield)](https://circleci.com/gh/eamonnsullivan/github-api-lib/tree/main) [![Clojars Project](https://img.shields.io/clojars/v/eamonnsullivan/github-api-lib.svg)](https://clojars.org/eamonnsullivan/github-api-lib)
 
-[![Clojars Project](https://img.shields.io/clojars/v/eamonnsullivan/github-api-lib.svg)](https://clojars.org/eamonnsullivan/github-api-lib)
+## Usage
 
 You will need a Github access token with `repo` permissions. This is one way to provide that value:
 ```clojure
