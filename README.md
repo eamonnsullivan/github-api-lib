@@ -3,6 +3,7 @@
 A small, very simple library with bits and pieces of Github's GraphQL and REST API, in one place for my own convenience.
 
 ## Usage
+[![CircleCI](https://circleci.com/gh/eamonnsullivan/github-api-lib.svg?style=svg)](https://circleci.com/gh/eamonnsullivan/github-api-lib)
 
 [![Clojars Project](https://img.shields.io/clojars/v/eamonnsullivan/github-api-lib.svg)](https://clojars.org/eamonnsullivan/github-api-lib)
 
