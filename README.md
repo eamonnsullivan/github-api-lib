@@ -10,6 +10,30 @@ You will need a Github access token with `repo` permissions. This is one way to 
 ```clojure
 (def token (System/getenv "GITHUB_ACCESS_TOKEN"))
 ```
+### Core functions
+```clojure
+(require '[eamonnsullivan.github-api-lib.core :as core])
+
+(core/get-repo-id token "https://github.com/eamonnsullivan/github-api-lib")
+;; "MDEwOlJlcG9zaXRvcnkzMDYxMjYwNDY="
+
+(core/get-repo-topics token "eamonnsullivan/github-api-lib")
+;; ["clojure" "clojars" "github-graphql"]
+
+;; make your own graphql query
+(def get-repo-id
+   "query getRepoId ($owner: String!, $name: String!) {
+      repository(owner:$owner, name:$name) {
+        id
+      }
+    }
+   ")
+
+(core/make-graphql-post
+   token
+   get-repo-id
+   {:owner "eamonnsullivan" :name "github-api-lib"})
+```
 ### Pull Requests
 
 ```clojure

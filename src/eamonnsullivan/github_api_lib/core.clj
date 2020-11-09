@@ -3,6 +3,8 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]))
 
+(def ^:dynamic *default-page-size* 10)
+
 (def github-url "https://api.github.com/graphql")
 
 (defn request-opts
@@ -96,26 +98,26 @@
                  some? some?
                  initk nil}}]
   (reify
-   clojure.lang.Seqable
-   (seq [_]
-        ((fn next [ret]
-           (when (some? ret)
-             (cons (vf ret)
-                   (when-some [k (kf ret)]
-                     (lazy-seq (next (step! k)))))))
-         (step! initk)))
-   clojure.lang.IReduceInit
-   (reduce [_ rf init]
-           (loop [acc init
-                  ret (step! initk)]
-             (if (some? ret)
-               (let [acc (rf acc (vf ret))]
-                 (if (reduced? acc)
-                   @acc
-                   (if-some [k (kf ret)]
-                     (recur acc (step! k))
-                     acc)))
-               acc)))))
+    clojure.lang.Seqable
+    (seq [_]
+      ((fn next [ret]
+         (when (some? ret)
+           (cons (vf ret)
+                 (when-some [k (kf ret)]
+                   (lazy-seq (next (step! k)))))))
+       (step! initk)))
+    clojure.lang.IReduceInit
+    (reduce [_ rf init]
+      (loop [acc init
+             ret (step! initk)]
+        (if (some? ret)
+          (let [acc (rf acc (vf ret))]
+            (if (reduced? acc)
+              @acc
+              (if-some [k (kf ret)]
+                (recur acc (step! k))
+                acc)))
+          acc)))))
 
 (defn get-all-pages
   "Convenience function for getting all of the results from a paged search.
@@ -126,11 +128,57 @@
 
    Returns a flattened, realised sequence with all of the result. Don't
    use this on an infinite or very big sequence."
-  [getter results? valuesfn]
-  (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
-                             (-> ret :data :search :pageInfo :endCursor)
-                             nil))]
-    (vec (reduce
-          (fn [acc page] (concat acc page))
-          []
-          (iteration getter :vf valuesfn :kf get-next :some? results?)))))
+  ([getter results? valuesfn]
+   (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
+                              (-> ret :data :search :pageInfo :endCursor)
+                              nil))]
+     (get-all-pages getter results? valuesfn get-next)))
+  ([getter results? valuesfn get-nextfn]
+   (vec (reduce
+         (fn [acc page] (concat acc page))
+         []
+         (iteration getter :vf valuesfn :kf get-nextfn :some? results?)))))
+
+(defn get-repo-id
+  "Get the unique ID value for a repository."
+  ([access-token url]
+   (let [repo (parse-repo url)
+         owner (:owner repo)
+         name (:name repo)]
+     (when repo
+       (get-repo-id access-token owner name))))
+  ([access-token owner repo-name]
+   (let [variables {:owner owner :name repo-name}]
+     (-> (make-graphql-post
+          access-token
+          (get-graphql "get-repo-id-query")
+          variables)
+         :data
+         :repository
+         :id))))
+
+(defn get-topics
+  [page]
+  (into [] (map #(str (-> % :topic :name))
+                (-> page :data :node :repositoryTopics :nodes))))
+
+(defn get-page-of-topics
+  "Get a page of topics on a repo"
+  [access-token repo-id page-size cursor]
+  (-> (make-graphql-post
+       access-token
+       (get-graphql "repo-topic-query")
+       {:repoId repo-id :first page-size :after cursor})))
+
+(defn get-repo-topics
+  "Get all of the topics attached to a repo."
+  ([access-token url]
+   (get-repo-topics access-token url *default-page-size*))
+  ([access-token url page-size]
+   (let [repo-id (get-repo-id access-token url)
+         get-page (partial get-page-of-topics access-token repo-id page-size)
+         results? (fn [page] (some? (get-topics page)))
+         get-next (fn [ret] (if (-> ret :data :node :repositoryTopics :pageInfo :hasNextPage)
+                              (-> ret :data :node :repositoryTopics :pageInfo :endCursor)
+                              nil))]
+     (get-all-pages get-page results? get-topics get-next))))

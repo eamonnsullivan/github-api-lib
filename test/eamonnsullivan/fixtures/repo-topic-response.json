@@ -1,0 +1,44 @@
+{
+  "data": {
+    "node": {
+      "repositoryTopics": {
+        "nodes": [
+          {
+            "topic": {
+              "name": "cps"
+            }
+          },
+          {
+            "topic": {
+              "name": "cam"
+            }
+          },
+          {
+            "topic": {
+              "name": "dpub"
+            }
+          },
+          {
+            "topic": {
+              "name": "node"
+            }
+          },
+          {
+            "topic": {
+              "name": "frontend"
+            }
+          },
+          {
+            "topic": {
+              "name": "optimo"
+            }
+          }
+        ],
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": "Y3Vyc29yOnYyOpHOARzyUg=="
+        }
+      }
+    }
+  }
+}

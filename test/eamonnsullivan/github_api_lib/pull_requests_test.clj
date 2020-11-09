@@ -30,24 +30,6 @@
   (fn [m]
     (= value (m key))))
 
-(deftest test-get-repo-id
-  (with-redefs [core/http-post (fn [_ _ _] {:body repo-id-response-success})]
-    (testing "parses id from successful response"
-      (is (= "MDEwOlJlcG9zaXRvcnkyOTczNzY1NTc=" (sut/get-repo-id "secret-token" "owner" "repo-name"))))
-    (testing "handles url instead of separate owner/repo-name"
-      (is (= "MDEwOlJlcG9zaXRvcnkyOTczNzY1NTc=" (sut/get-repo-id "secret-token" "owner/repo-name")))
-      (is (= "MDEwOlJlcG9zaXRvcnkyOTczNzY1NTc=" (sut/get-repo-id "secret-token" "https://github.com/owner/repo-name")))))
-  (with-redefs [core/http-post (fn [_ _ _] {:body repo-id-response-failure})]
-    (testing "throws exception on error"
-      (is (thrown-with-msg? RuntimeException
-                            #"Could not resolve to a Repository with the name 'eamonnsullivan/not-there'."
-                            (sut/get-repo-id "secret-token" "owner" "repo-name")))))
-  (with-redefs [core/parse-repo (fn [_] (throw (ex-info "error" {})))]
-    (testing "passes on thrown exceptions from parse-repo"
-      (is (thrown-with-msg? RuntimeException
-                            #"error"
-                            (sut/get-repo-id "secret-token" "whatever/whatever"))))))
-
 (defn make-fake-post
   [query-response mutation-response query-asserts mutation-asserts]
   (fn [_ payload _] (if (string/includes? payload "mutation")
