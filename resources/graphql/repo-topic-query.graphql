@@ -1,0 +1,17 @@
+query RepoTopicQuery ($repoId: ID!, $first: Int!, $after: String) {
+  node(id: $repoId) {
+    ... on Repository {
+      repositoryTopics(first: $first, after: $after) {
+        nodes {
+          topic {
+            name
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+}

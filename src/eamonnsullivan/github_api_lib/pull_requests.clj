@@ -26,24 +26,6 @@
         body (json/read-str (:body response) :key-fn keyword)]
     (:node_id body)))
 
-(defn get-repo-id
-  "Get the unique ID value for a repository."
-  ([access-token url]
-   (let [repo (core/parse-repo url)
-         owner (:owner repo)
-         name (:name repo)]
-     (when repo
-       (get-repo-id access-token owner name))))
-  ([access-token owner repo-name]
-   (let [variables {:owner owner :name repo-name}]
-     (-> (core/make-graphql-post
-          access-token
-          (core/get-graphql "get-repo-id-query")
-          variables)
-         :data
-         :repository
-         :id))))
-
 (defn get-pull-request-id
   "Find the unique ID of a pull request on the repository at the
   provided url. Set must-be-open? to true to filter the pull requests
@@ -135,7 +117,7 @@
           base-branch :base
           merging-branch :branch
           draft :draft} (merge create-pr-defaults pull-request)
-         repo-id (get-repo-id access-token owner repo-name)
+         repo-id (core/get-repo-id access-token owner repo-name)
          variables {:repositoryId repo-id
                     :title title
                     :body body
