@@ -1,6 +1,29 @@
 (ns eamonnsullivan.github-api-lib.pull-requests
   (:require [eamonnsullivan.github-api-lib.core :as core]
+            [eamonnsullivan.github-api-lib.repos :as repos]
             [clojure.data.json :as json]))
+
+(defn pull-request-number
+  "Get the pull request number from a full or partial URL."
+  [pull-request-url]
+  (let [matches (re-matches #"(https://github.com/)?[^/]*/[^/]*/pull/([0-9]*)" pull-request-url)
+        [_ _ number] matches]
+    (if (not-empty number)
+      (Integer/parseInt number)
+      (throw (ex-info (format "Could not parse pull request number from url: %s" pull-request-url) {})))))
+
+(defn parse-comment-url
+  "Get the comment number and pull request url from an issue comment URL."
+  [comment-url]
+  (let [matches (re-matches #"(https://github.com/)?([^/]*)/([^/]*)/pull/([0-9]*)#issuecomment-([0-9]*)" comment-url)
+        [_ _ owner name number comment] matches]
+    (if (and (not-empty owner)
+             (not-empty name)
+             (not-empty number)
+             (not-empty comment))
+      {:pullRequestUrl (format "https://github.com/%s/%s/pull/%s" owner name number)
+       :issueComment comment}
+      (throw (ex-info (format "Could not parse comment from url: %s" comment-url) {})))))
 
 (defn get-pull-request-node-id
   "Get the node id of a pull request using the v3 REST api, optionally
@@ -34,8 +57,8 @@
   ([access-token url]
    (get-pull-request-id access-token url false))
   ([access-token url must-be-open?]
-   (let [repo (core/parse-repo url)
-         prnum (core/pull-request-number url)
+   (let [repo (repos/parse-repo url)
+         prnum (pull-request-number url)
          owner (:owner repo)
          name (:name repo)]
      (or
@@ -45,10 +68,10 @@
 (defn get-issue-comment-id
   "Find the unique ID of an issue comment on a pull request. Returns nil if not found."
   [access-token comment-url]
-  (let [repo (core/parse-repo comment-url)
+  (let [repo (repos/parse-repo comment-url)
         owner (:owner repo)
         name (:name repo)
-        comment (:issueComment (core/parse-comment-url comment-url))]
+        comment (:issueComment (parse-comment-url comment-url))]
     (or
      (get-comment-node-id access-token owner name comment)
      (throw (ex-info (format "Could not find comment: %s" comment-url) {})))))
@@ -106,7 +129,7 @@
    and :revertUrl.
   "
   ([access-token url pull-request]
-   (let [repo (core/parse-repo url)]
+   (let [repo (repos/parse-repo url)]
      (when repo
        (create-pull-request access-token (merge pull-request repo)))))
   ([access-token pull-request]
@@ -117,7 +140,7 @@
           base-branch :base
           merging-branch :branch
           draft :draft} (merge create-pr-defaults pull-request)
-         repo-id (core/get-repo-id access-token owner repo-name)
+         repo-id (repos/get-repo-id access-token owner repo-name)
          variables {:repositoryId repo-id
                     :title title
                     :body body

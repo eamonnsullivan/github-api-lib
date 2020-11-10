@@ -25,6 +25,33 @@
 (def merge-pull-request-failure (slurp "./test/eamonnsullivan/fixtures/merge-pull-request-failure.json"))
 (def pull-request-properties (slurp "./test/eamonnsullivan/fixtures/pull-request-properties.json"))
 
+(deftest test-pull-request-number
+  (testing "Finds the pull request number when given a url"
+    (is (= 1278 (sut/pull-request-number "https://github.com/owner/name/pull/1278")))
+    (is (= 8 (sut/pull-request-number "https://github.com/owner/name/pull/8")))
+    (is (= 1278456 (sut/pull-request-number "https://github.com/owner/name/pull/1278456"))))
+  (testing "Throws if no pull request number is found"
+    (is (thrown-with-msg? RuntimeException
+                          #"Could not parse pull request number from url: something else"
+                          (sut/pull-request-number "something else")))
+    (is (thrown-with-msg? RuntimeException
+                          #"Could not parse pull request number from url: https://github.com/owner/name/pull"
+                          (sut/pull-request-number "https://github.com/owner/name/pull")))))
+
+
+(deftest test-get-pr-from-comment-url
+  (testing "parses a pull request url from a comment url"
+    (is (= "https://github.com/eamonnsullivan/github-pr-lib/pull/4"
+           (:pullRequestUrl (sut/parse-comment-url "https://github.com/eamonnsullivan/github-pr-lib/pull/4#issuecomment-702092682"))))
+    (is (= "https://github.com/eamonnsullivan/github-pr-lib/pull/4"
+           (:pullRequestUrl (sut/parse-comment-url "eamonnsullivan/github-pr-lib/pull/4#issuecomment-702092682"))))
+    (is (= "702092682"
+           (:issueComment (sut/parse-comment-url "eamonnsullivan/github-pr-lib/pull/4#issuecomment-702092682")))))
+  (testing "Throws when a pull request url can't be found"
+    (is (thrown-with-msg? RuntimeException
+                          #"Could not parse comment from url: https://news.bbc.co.uk"
+                          (sut/parse-comment-url "https://news.bbc.co.uk")))))
+
 (defn has-value
   [key value]
   (fn [m]
