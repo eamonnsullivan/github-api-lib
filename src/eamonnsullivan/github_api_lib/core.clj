@@ -3,8 +3,6 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]))
 
-(def ^:dynamic *default-page-size* 10)
-
 (def github-url "https://api.github.com/graphql")
 
 (defn request-opts
@@ -40,38 +38,6 @@
     (if errors
       (throw (ex-info (:message (first errors)) response))
       body)))
-
-(defn parse-repo
-  "Parse a repository url (a full url or just the owner/name part) and
-  return a map with :owner and :name keys."
-  [url]
-  (let [matches (re-matches #"(https://github.com/)?([^/]*)/([^/]*).*$" url)
-        [_ _ owner name] matches]
-    (if (and owner name (not-empty owner) (not-empty name))
-      {:owner owner :name name}
-      (throw (ex-info (format "Could not parse repository from url: %s" url) {})))))
-
-(defn pull-request-number
-  "Get the pull request number from a full or partial URL."
-  [pull-request-url]
-  (let [matches (re-matches #"(https://github.com/)?[^/]*/[^/]*/pull/([0-9]*)" pull-request-url)
-        [_ _ number] matches]
-    (if (not-empty number)
-      (Integer/parseInt number)
-      (throw (ex-info (format "Could not parse pull request number from url: %s" pull-request-url) {})))))
-
-(defn parse-comment-url
-  "Get the comment number and pull request url from an issue comment URL."
-  [comment-url]
-  (let [matches (re-matches #"(https://github.com/)?([^/]*)/([^/]*)/pull/([0-9]*)#issuecomment-([0-9]*)" comment-url)
-        [_ _ owner name number comment] matches]
-    (if (and (not-empty owner)
-             (not-empty name)
-             (not-empty number)
-             (not-empty comment))
-      {:pullRequestUrl (format "https://github.com/%s/%s/pull/%s" owner name number)
-       :issueComment comment}
-      (throw (ex-info (format "Could not parse comment from url: %s" comment-url) {})))))
 
 (defn iteration
   "Taken from https://clojure.atlassian.net/browse/CLJ-2555.
@@ -125,9 +91,11 @@
    getter: function that returns a single page, given a cursor string.
    results?: function that returns a boolean indicating whether the current page contains values.
    valuesfn: function to extract the values from a page.
+   get-nextfn: function to get the cursor for the next page. Optional. Defaults to one that looks
+               for the values in :data -> :search -> :pageInfo.
 
    Returns a flattened, realised sequence with all of the result. Don't
-   use this on an infinite or very big sequence."
+   use this on an infinite or enormous sequence."
   ([getter results? valuesfn]
    (let [get-next (fn [ret] (if (-> ret :data :search :pageInfo :hasNextPage)
                               (-> ret :data :search :pageInfo :endCursor)
@@ -138,47 +106,3 @@
          (fn [acc page] (concat acc page))
          []
          (iteration getter :vf valuesfn :kf get-nextfn :some? results?)))))
-
-(defn get-repo-id
-  "Get the unique ID value for a repository."
-  ([access-token url]
-   (let [repo (parse-repo url)
-         owner (:owner repo)
-         name (:name repo)]
-     (when repo
-       (get-repo-id access-token owner name))))
-  ([access-token owner repo-name]
-   (let [variables {:owner owner :name repo-name}]
-     (-> (make-graphql-post
-          access-token
-          (get-graphql "get-repo-id-query")
-          variables)
-         :data
-         :repository
-         :id))))
-
-(defn get-topics
-  [page]
-  (into [] (map #(str (-> % :topic :name))
-                (-> page :data :node :repositoryTopics :nodes))))
-
-(defn get-page-of-topics
-  "Get a page of topics on a repo"
-  [access-token repo-id page-size cursor]
-  (-> (make-graphql-post
-       access-token
-       (get-graphql "repo-topic-query")
-       {:repoId repo-id :first page-size :after cursor})))
-
-(defn get-repo-topics
-  "Get all of the topics attached to a repo."
-  ([access-token url]
-   (get-repo-topics access-token url *default-page-size*))
-  ([access-token url page-size]
-   (let [repo-id (get-repo-id access-token url)
-         get-page (partial get-page-of-topics access-token repo-id page-size)
-         results? (fn [page] (some? (get-topics page)))
-         get-next (fn [ret] (if (-> ret :data :node :repositoryTopics :pageInfo :hasNextPage)
-                              (-> ret :data :node :repositoryTopics :pageInfo :endCursor)
-                              nil))]
-     (get-all-pages get-page results? get-topics get-next))))
