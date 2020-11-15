@@ -19,6 +19,10 @@
     (is (= {:owner "eamonnsullivan" :name "github-search"} (sut/parse-repo "eamonnsullivan/github-search/blob/master/src/eamonnsullivan/github_search.clj")))
     (is (= {:owner "eamonnsullivan" :name "github-pr-lib"} (sut/parse-repo "eamonnsullivan/github-pr-lib/pull/1")))
     (is (= {:owner "bbc" :name "optimo"} (sut/parse-repo "bbc/optimo/pull/1277"))))
+  (testing "handles ssh urls as well"
+    (is (= {:owner "eamonnsullivan" :name "emacs.d"} (sut/parse-repo "git@github.com:eamonnsullivan/emacs.d.git")))
+    (is (= {:owner "eamonnsullivan" :name "github-search"} (sut/parse-repo "git@github.com:eamonnsullivan/github-search.git")))
+    (is (= {:owner "eamonnsullivan" :name "github-pr-lib"} (sut/parse-repo "git@github.com:eamonnsullivan/github-pr-lib.git"))))
   (testing "Throws an exception when the url is incomplete or unrecognised"
     (is (thrown-with-msg? RuntimeException
                           #"Could not parse repository from url: something else"

@@ -1,5 +1,6 @@
 (ns eamonnsullivan.github-api-lib.repos
-  (:require [eamonnsullivan.github-api-lib.core :as core]))
+  (:require [clojure.string :as string]
+            [eamonnsullivan.github-api-lib.core :as core]))
 
 (def ^:dynamic *default-page-size* 10)
 
@@ -7,10 +8,13 @@
   "Parse a repository url (a full url or just the owner/name part) and
   return a map with :owner and :name keys."
   [url]
-  (let [matches (re-matches #"(https://github.com/)?([^/]*)/([^/]*).*$" url)
-        [_ _ owner name] matches]
+  (let [matches (re-matches #"(https://github.com/|git@github.com:)?([^/]*)/([^/]*)(.git)?.*$" url)
+        [_ _ owner name _] matches]
     (if (and owner name (not-empty owner) (not-empty name))
-      {:owner owner :name name}
+      {:owner owner
+       :name (if (string/ends-with? name ".git")
+               (string/replace name #".git$" "")
+               name)}
       (throw (ex-info (format "Could not parse repository from url: %s" url) {})))))
 
 (defn get-repo-id
