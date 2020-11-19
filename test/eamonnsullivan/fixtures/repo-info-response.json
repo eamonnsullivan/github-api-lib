@@ -1,0 +1,22 @@
+{
+  "data": {
+    "repository": {
+      "id": "MDEwOlJlcG9zaXRvcnkxMTU3MTY1MzU=",
+      "name": "something",
+      "description": "Something is a really cool microservice.",
+      "url": "https://github.com/owner/something",
+      "sshUrl": "git@github.com:owner/something.git",
+      "updatedAt": "2020-10-09T07:32:55Z",
+      "languages": {
+        "nodes": [
+          {
+            "name": "JavaScript"
+          },
+          {
+            "name": "Scala"
+          }
+        ]
+      }
+    }
+  }
+}

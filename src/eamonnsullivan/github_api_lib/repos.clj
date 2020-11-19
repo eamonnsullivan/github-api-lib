@@ -35,6 +35,25 @@
          :repository
          :id))))
 
+(defn get-repo-info
+  "Get general information about a repository, including it's id"
+  ([access-token url]
+   (let [repo (parse-repo url)
+         owner (:owner repo)
+         name (:name repo)]
+     (when repo
+       (get-repo-info access-token owner name))))
+  ([access-token owner repo-name]
+   (let [variables {:owner owner :name repo-name}
+         response (-> (core/make-graphql-post
+                       access-token
+                       (core/get-graphql "get-repo-info-query")
+                       variables)
+                      :data
+                      :repository)]
+     (merge response {:languages (into [] (map #(str (% :name)) (-> response :languages :nodes)))}))))
+
+
 (defn get-topics
   [page]
   (into [] (map #(str (-> % :topic :name))

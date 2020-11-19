@@ -7,6 +7,8 @@
 (def repo-id-response-success (slurp "./test/eamonnsullivan/fixtures/repo-response-success.json"))
 (def repo-id-response-failure (slurp "./test/eamonnsullivan/fixtures/repo-response-failure.json"))
 (def repo-topic-response-success (slurp "./test/eamonnsullivan/fixtures/repo-topic-response.json"))
+(def repo-info-response-success (slurp "./test/eamonnsullivan/fixtures/repo-info-response.json"))
+(def repo-info-response-failure (slurp "./test/eamonnsullivan/fixtures/repo-info-response-failure.json"))
 
 (deftest test-parse-repo
   (testing "Finds owner and repo name from github url"
@@ -90,3 +92,17 @@
     (testing "follows pages"
       (is (= ["tag1" "tag2" "tag3" "tag4"]
              (sut/get-repo-topics "secret-token" "eamonnsullivan/github-api-lib"))))))
+
+(deftest test-get-repo-info
+  (with-redefs [core/http-post (fn [_ _ _] {:body repo-info-response-success})]
+    (testing "Returns information about a repository"
+      (is (= "something"
+             (:name (sut/get-repo-info "secret-token" "owner/something"))))
+      (is (= "https://github.com/owner/something"
+             (:url (sut/get-repo-info "secret-token" "owner" "something"))))
+      (is (= "Something is a really cool microservice."
+             (:description (sut/get-repo-info "secret-token" "owner" "something"))))
+      (is (= "MDEwOlJlcG9zaXRvcnkxMTU3MTY1MzU="
+             (:id (sut/get-repo-info "secret-token" "owner" "something"))))
+      (is (= ["JavaScript" "Scala"]
+             (:languages (sut/get-repo-info "secret-token" "owner/something")))))))

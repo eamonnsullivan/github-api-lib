@@ -1,0 +1,15 @@
+query getRepoId ($owner: String!, $name: String!) {
+  repository(owner:$owner, name:$name) {
+    id
+    name
+    description
+    url
+    sshUrl
+    updatedAt
+    languages(first: 2 orderBy:{field: SIZE, direction:DESC}) {
+      nodes {
+        name
+      }
+    }
+  }
+}
