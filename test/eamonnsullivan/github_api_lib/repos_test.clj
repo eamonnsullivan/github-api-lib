@@ -105,4 +105,9 @@
       (is (= "MDEwOlJlcG9zaXRvcnkxMTU3MTY1MzU="
              (:id (sut/get-repo-info "secret-token" "owner" "something"))))
       (is (= ["JavaScript" "Scala"]
-             (:languages (sut/get-repo-info "secret-token" "owner/something")))))))
+             (:languages (sut/get-repo-info "secret-token" "owner/something"))))))
+  (with-redefs [core/http-post (fn [_ _ _] {:body repo-info-response-failure})]
+    (testing "Throws with appropriate message on error"
+      (is (thrown-with-msg? RuntimeException
+                            #"Could not resolve to a Repository with the name 'owner/something-random'."
+                            (sut/get-repo-info "secret-token" "whatever/whatever"))))))
