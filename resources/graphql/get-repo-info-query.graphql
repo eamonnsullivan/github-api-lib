@@ -6,7 +6,7 @@ query getRepoId ($owner: String!, $name: String!) {
     url
     sshUrl
     updatedAt
-    languages(first: 2 orderBy:{field: SIZE, direction:DESC}) {
+    languages(first: 10 orderBy:{field: SIZE, direction:DESC}) {
       nodes {
         name
       }
