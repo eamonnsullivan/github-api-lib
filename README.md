@@ -175,7 +175,7 @@ You can also try several files and the first one found is returned.
 
 ### Handling paged responses
 
-The library has a helper function to retrieve all of the pages of a search, return all of the results as a flattened, realised sequence.
+The library has a helper function to retrieve all of the pages of a search as a flattened, realised sequence.
 
 See the doc string for more details, but it is normally called with:
  * a function to retrieve one of the pages
