@@ -172,6 +172,36 @@ You can also try several files and the first one found is returned.
  :text
  "{:paths [\"src\" \"resources\"]\n :deps ..."}
 ```
+
+### Handling paged responses
+
+The library has a helper function to retrieve all of the pages of a search, return all of the results as a flattened, realised sequence.
+
+See the doc string for more details, but it is normally called with:
+ * a function to retrieve one of the pages
+ * a predicate that returns truthy if there are results on that page
+ * a function to extract the values you want from each page
+ * A function to retrieve the cursor for the next page.
+
+It obviously would be a poor choice for a very large result set, but it can be convenient for a known limited set. In this example, the function is used to get all of the topics on a given repository.
+
+```clojure
+(require '[eamonnsullivan.github-api-lib.core :as core]
+         '[eamonnsullivan.github-api-lib.repos :as repos])
+
+(defn get-all-topics [token repo-url page-size]
+        (let [id (repos/get-repo-id token repo-url)
+              get-page (partial repos/get-page-of-topics token id page-size)
+              results? (fn [page] (some? (repos/get-topics page)))
+              get-next (fn [ret] (if (-> ret :data :node :repsitoryTopics :pageInfo :hasNextPage)
+                                   (-> ret :data :node :repositoryTopics :pageInfo :endCursor)
+                                   nil))]
+          (core/get-all-pages get-page results? repos/get-topics get-next)))
+
+(get-all-topics token "https://github.com/eamonnsullivan/github-api-lib" 10)
+;; ["clojure" "clojars" "github-graphql"]
+
+```
 ## Development Notes
 
 To run the project's tests:
@@ -197,7 +227,7 @@ To deploy it to Clojars -- needs `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` envir
 
 ## License
 
-Copyright © 2020 Eamonn
+Copyright © 2020 Eamonn Sullivan
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
