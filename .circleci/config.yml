@@ -7,7 +7,7 @@ orbs:
 executors:
   tools-deps-executor:
     docker:
-      - image: circleci/clojure:openjdk-11-tools-deps-1.10.1.697
+      - image: cimg/openjdk:11.0
     working_directory: ~/repo
     environment:
       JVM_OPTS: -Xmx3200m
@@ -52,11 +52,6 @@ commands:
       - run:
           name: Zip up jar file
           command: zip --junk-paths github-api-lib github-api-lib.jar
-      - run:
-          name: install mvn
-          command: |
-            sudo apt-get update
-            sudo apt-get -y install maven
       - run:
           name: extract version from pom
           command: |
