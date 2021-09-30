@@ -7,7 +7,7 @@ orbs:
 executors:
   tools-deps-executor:
     docker:
-      - image: circleci/clojure:openjdk-11-tools-deps-1.10.1.697
+      - image:  circleci/clojure:openjdk-11-tools-deps-bullseye
     working_directory: ~/repo
     environment:
       JVM_OPTS: -Xmx3200m
